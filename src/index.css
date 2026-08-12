@@ -1,1 +1,29 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+    z-index: 1;
+}
+
+::view-transition-new(root) {
+    z-index: 2;
+    /* Duração de 0.8s, começando rápido e terminando suave */
+    animation: expand-circle 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes expand-circle {
+    from {
+        /* Começa um círculo tamanho zero exatamente na posição top-8 right-8 */
+        clip-path: circle(0px at calc(100% - 4rem) 4rem);
+    }
+    to {
+        /* Expande até cobrir a tela inteira (150%) */
+        clip-path: circle(150% at calc(100% - 4rem) 4rem);
+    }
+}
