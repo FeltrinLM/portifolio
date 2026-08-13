@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { flushSync } from 'react-dom';
 import { DndContext, useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -8,7 +9,6 @@ const CIRCLE_RADIUS = 250;
 const ORBIT_RADIUS = 340;
 const CENTER = 400;
 
-// Lista das páginas
 const PIECES = [
     { id: '/sobre', label: 'Sobre', angle: -68 },
     { id: '/experiencia', label: 'Experiência', angle: -24 },
@@ -26,15 +26,11 @@ function getPosition(angle, radius) {
 
 // 1. As Peças (Fragmentos do Menu)
 function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnapping }) {
-    // Se a peça estiver ativa, desabilitamos o arrasto (disabled: true)
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id,
         disabled: isActive
     });
 
-    // A MÁGICA DO POSICIONAMENTO:
-    // Se for a página atual, ela vai pro centro (ângulo zero + a rotação do círculo) e cola no raio do círculo (265 compensa o eixo do SVG).
-    // Se não for, ela fica na sua órbita normal esperando ser puxada.
     const currentBaseAngle = isActive ? circleRotation : angle;
     const currentRadius = isActive ? CIRCLE_RADIUS + 15 : ORBIT_RADIUS;
     const { x: startX, y: startY } = getPosition(currentBaseAngle, currentRadius);
@@ -42,7 +38,6 @@ function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnappin
     let finalTransform = transform;
     let currentAngle = currentBaseAngle;
 
-    // Lógica da barreira e rotação contínua (apenas para a peça sendo arrastada)
     if (transform && isDragging) {
         const rawX = startX + transform.x;
         const rawY = startY + transform.y;
@@ -51,7 +46,6 @@ function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnappin
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         const MIN_RADIUS = 220;
-        // 1. BARREIRA EXTERNA REDUZIDA (De 480 para 380, não deixa fugir da tela)
         const MAX_RADIUS = 380;
         const clampedDistance = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, distance));
 
@@ -67,8 +61,6 @@ function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnappin
         currentAngle = (Math.atan2(clampedX - CENTER, CENTER - clampedY) * 180) / Math.PI;
     }
 
-    // UX: Se esta for a peça ativa, e o usuário estiver tentando encaixar outra,
-    // nós a "escondemos" temporariamente para abrir espaço.
     const isGhosted = isActive && isSnapping;
 
     const style = {
@@ -77,11 +69,11 @@ function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnappin
         top: `${startY - 30}px`,
         transform: finalTransform
             ? `translate3d(${finalTransform.x}px, ${finalTransform.y}px, 0) rotate(${currentAngle}deg) scale(1.1)`
-            : `rotate(${currentAngle}deg) scale(${isGhosted ? 0.5 : 1})`, // Encolhe se for ghosted
+            : `rotate(${currentAngle}deg) scale(${isGhosted ? 0.5 : 1})`,
         transformOrigin: 'center center',
         zIndex: isActive ? 20 : (isDragging ? 50 : 10),
-        opacity: isGhosted ? 0 : 1, // Fica invisível para abrir a fechadura
-        pointerEvents: isActive ? 'none' : 'auto', // A peça ativa não bloqueia o mouse
+        opacity: isGhosted ? 0 : 1,
+        pointerEvents: isActive ? 'none' : 'auto',
     };
 
     return (
@@ -90,17 +82,17 @@ function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnappin
             style={style}
             {...listeners}
             {...attributes}
-            // A peça ativa perde a luvinha (cursor-grab) porque não pode ser arrastada
-            className={`${isActive ? 'cursor-default' : 'cursor-grab active:cursor-grabbing hover:brightness-110'} touch-none drop-shadow-lg ${
+            // 1. A MÁGICA AQUI: Adicionamos "select-none" para impedir o navegador de grifar o texto
+            className={`select-none ${isActive ? 'cursor-default' : 'cursor-grab active:cursor-grabbing hover:brightness-110'} touch-none drop-shadow-lg ${
                 isDragging ? '' : 'transition-all duration-500 ease-out'
             }`}
         >
-            <svg width="140" height="60" viewBox="0 0 140 60" className="overflow-visible">
+            {/* 2. E AQUI: Adicionamos "pointer-events-none" para o clique ir direto para a div arrastável */}
+            <svg width="140" height="60" viewBox="0 0 140 60" className="overflow-visible pointer-events-none">
                 <path id={`curve-${label}`} d="M 10,50 A 250,250 0 0,1 130,50" fill="none" />
                 <path
                     d="M 10,45 A 250,250 0 0,1 130,45"
                     fill="none"
-                    // A peça ativa fica com uma cor mais brilhante para mostrar que a magia está fluindo por ela
                     stroke={isActive ? "#a4c5ae" : "#91B09A"}
                     strokeWidth="26"
                     strokeLinecap="round"
@@ -119,7 +111,7 @@ function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnappin
 // 2. O Componente Principal Navbar
 export function Navbar() {
     const navigate = useNavigate();
-    const location = useLocation(); // Hook para ler a URL atual (ex: "/projetos")
+    const location = useLocation();
 
     const [circleRotation, setCircleRotation] = useState(0);
     const [isSnapping, setIsSnapping] = useState(false);
@@ -149,8 +141,24 @@ export function Navbar() {
 
     function handleDragEnd(event) {
         if (isSnapping) {
-            // Ao navegar, o componente atualiza, mudando a "isActive" da peça velha para a nova!
-            navigate(event.active.id);
+            const novaRota = event.active.id;
+
+            // Lógica de transição específica para as páginas
+            if (document.startViewTransition) {
+                document.documentElement.classList.add('page-transition');
+
+                const transition = document.startViewTransition(() => {
+                    flushSync(() => {
+                        navigate(novaRota);
+                    });
+                });
+
+                transition.finished.finally(() => {
+                    document.documentElement.classList.remove('page-transition');
+                });
+            } else {
+                navigate(novaRota);
+            }
         }
         setCircleRotation(0);
         setIsSnapping(false);
@@ -164,8 +172,6 @@ export function Navbar() {
 
             <div className="relative w-[800px] h-[800px] pointer-events-auto">
                 <DndContext onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
-
-                    {/* Círculo Principal */}
                     <svg
                         width="800"
                         height="800"
@@ -188,14 +194,12 @@ export function Navbar() {
                         />
                     </svg>
 
-                    {/* Peças Dinâmicas */}
                     {PIECES.map(piece => (
                         <FragmentoDeMenu
                             key={piece.id}
                             id={piece.id}
                             label={piece.label}
                             angle={piece.angle}
-                            // Passamos a informação se esta peça é a página atual
                             isActive={location.pathname === piece.id}
                             circleRotation={circleRotation}
                             isSnapping={isSnapping}

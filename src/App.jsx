@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { flushSync } from 'react-dom';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -25,18 +24,21 @@ function ConteudoDasPaginas() {
 
 export default function App() {
     const [isDarkMode, setIsDarkMode] = useState(false);
-
-    // Agora a aura também tem a propriedade 'visible'
     const [aura, setAura] = useState({ x: 0, y: 0, visible: false });
 
+    // A MÁGICA FOI CORRIGIDA AQUI:
+    // Retiramos o useEffect e a dupla chamada de transição.
+    // Agora o ThemeToggle cuida da animação, e o App apenas aplica a classe IMEDIATAMENTE.
     function handleThemeChange(newTheme) {
-        if (!document.startViewTransition) {
-            setIsDarkMode(newTheme);
-            return;
+        setIsDarkMode(newTheme);
+
+        // Aplica a classe do Tailwind de forma síncrona,
+        // garantindo que a "fotografia" da transição capture as novas cores!
+        if (newTheme) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
-        document.startViewTransition(() => {
-            flushSync(() => setIsDarkMode(newTheme));
-        });
     }
 
     return (
@@ -48,16 +50,12 @@ export default function App() {
                     <ConteudoDasPaginas />
                 </div>
 
-                {/*
-            CAMADA 2: A AURA (O mundo invertido)
-            Adicionamos transição de opacidade! Fica invisível quando aura.visible é falso.
-        */}
+                {/* CAMADA 2: A AURA */}
                 <div
                     className={`absolute inset-0 pointer-events-none z-10 transition-opacity duration-500 ease-out ${
                         !isDarkMode ? 'dark bg-[#3B381E]' : 'bg-[#D0C697]'
                     } ${aura.visible ? 'opacity-100' : 'opacity-0'}`}
                     style={{
-                        // Reduzido para 75px para ficar uma "lanterna" menor e mais focada
                         clipPath: `circle(75px at ${aura.x}px ${aura.y}px)`
                     }}
                     aria-hidden="true"

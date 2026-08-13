@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import { DndContext, useDraggable } from '@dnd-kit/core';
 
+// 1. Os Ícones Soltos
 function ÍconeMagico({ id, type, position, innerRef }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
     let currentX = position.x;
@@ -46,7 +48,7 @@ function ÍconeMagico({ id, type, position, innerRef }) {
     );
 }
 
-// Repare que passamos o innerRef aqui para o radar achá-lo
+// 2. O Caldeirão Mágico
 function CirculoReceptor({ isHovered, innerRef }) {
     return (
         <div
@@ -60,10 +62,11 @@ function CirculoReceptor({ isHovered, innerRef }) {
     );
 }
 
+// 3. Componente Principal
 export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
     const [isHovered, setIsHovered] = useState(false);
     const inactiveIconRef = useRef(null);
-    const circleRef = useRef(null); // Nova antena! Radar do círculo principal
+    const circleRef = useRef(null);
 
     const [positions, setPositions] = useState({
         'light-mode': { x: 0, y: 0 },
@@ -72,10 +75,29 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
 
     const MAGNETIC_RADIUS = 60;
 
+    // Função de animação limpa e blindada para o TEMA
+    function changeThemeWithAnimation(isDark) {
+        if (!document.startViewTransition) {
+            onThemeChange(isDark);
+            return;
+        }
+
+        document.documentElement.classList.add('theme-transition');
+
+        const transition = document.startViewTransition(() => {
+            flushSync(() => {
+                onThemeChange(isDark);
+            });
+        });
+
+        transition.finished.finally(() => {
+            document.documentElement.classList.remove('theme-transition');
+        });
+    }
+
     useEffect(() => {
         let frameId;
         const trackIcon = () => {
-            // Se tivermos as posições do ícone e do círculo na tela
             if (inactiveIconRef.current && circleRef.current) {
                 const iconRect = inactiveIconRef.current.getBoundingClientRect();
                 const circleRect = circleRef.current.getBoundingClientRect();
@@ -85,10 +107,8 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
                 const circleX = circleRect.left + circleRect.width / 2;
                 const circleY = circleRect.top + circleRect.height / 2;
 
-                // Mede a distância entre eles
                 const distance = Math.hypot(iconX - circleX, iconY - circleY);
 
-                // Se o ícone estiver a mais de 95px de distância, a aura "liga"!
                 setAura({
                     x: iconX + window.scrollX,
                     y: iconY + window.scrollY,
@@ -121,25 +141,30 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
         const distance = Math.sqrt(currentX * currentX + currentY * currentY);
         setIsHovered(false);
 
+        // Se soltou dentro da área do círculo magnético
         if (distance < MAGNETIC_RADIUS) {
-            if (active.id === 'light-mode' && isDarkMode) {
-                onThemeChange(false);
+            if (active.id === 'light-mode') {
+                // Força a ir para o modo claro se puxou o sol
+                changeThemeWithAnimation(false);
                 setPositions(prev => ({
                     'light-mode': { x: 0, y: 0 },
-                    'dark-mode': (prev['dark-mode'].x === 0 && prev['dark-mode'].y === 0) ? { x: -70, y: 0 } : prev['dark-mode']
+                    'dark-mode': prev['dark-mode'].x === 0 && prev['dark-mode'].y === 0 ? { x: -70, y: 0 } : prev['dark-mode']
                 }));
-            } else if (active.id === 'dark-mode' && !isDarkMode) {
-                onThemeChange(true);
+            } else if (active.id === 'dark-mode') {
+                // Força a ir para o modo escuro se puxou a lua
+                changeThemeWithAnimation(true);
                 setPositions(prev => ({
                     'dark-mode': { x: 0, y: 0 },
-                    'light-mode': (prev['light-mode'].x === 0 && prev['light-mode'].y === 0) ? { x: -70, y: 0 } : prev['light-mode']
+                    'light-mode': prev['light-mode'].x === 0 && prev['light-mode'].y === 0 ? { x: -70, y: 0 } : prev['light-mode']
                 }));
-            } else {
-                setPositions(prev => ({ ...prev, [active.id]: { x: 0, y: 0 } }));
             }
         }
         else {
-            setPositions(prev => ({ ...prev, [active.id]: { x: currentX, y: currentY } }));
+            // Se soltou fora, apenas atualiza a posição livremente na tela
+            setPositions(prev => ({
+                ...prev,
+                [active.id]: { x: currentX, y: currentY }
+            }));
         }
     }
 

@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* 1. Importando as fontes do Google (Cormorant Regular/Bold e Lato Light Italic) */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Lato:ital,wght@1,300&display=swap');
+
+/* 2. Ensinando as fontes para o Tailwind v4 */
+@theme {
+    --font-title: "Cormorant Garamond", serif;
+    --font-text: "Lato", sans-serif;
+}
+
+
+/* --- A MÁGICA DAS TRANSIÇÕES (View Transitions API) --- */
+::view-transition {
+    pointer-events: none; /* A MÁGICA QUE RESOLVE A ESPERA: Deixa os cliques passarem direto pela animação! */
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
     animation: none;
@@ -13,17 +28,24 @@
 
 ::view-transition-new(root) {
     z-index: 2;
-    /* Duração de 0.8s, começando rápido e terminando suave */
-    animation: expand-circle 0.8s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-@keyframes expand-circle {
-    from {
-        /* Começa um círculo tamanho zero exatamente na posição top-8 right-8 */
-        clip-path: circle(0px at calc(100% - 4rem) 4rem);
-    }
-    to {
-        /* Expande até cobrir a tela inteira (150%) */
-        clip-path: circle(150% at calc(100% - 4rem) 4rem);
-    }
+/* 1. Animação do Tema (Canto Superior Direito) - Duração de 1.4s */
+html.theme-transition::view-transition-new(root) {
+    animation: expand-theme 1.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 2. Animação da Página (Centro Inferior - Navbar) - Duração de 1.4s */
+html.page-transition::view-transition-new(root) {
+    animation: expand-page 1.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes expand-theme {
+    from { clip-path: circle(0px at calc(100% - 4rem) 4rem); }
+    to { clip-path: circle(150% at calc(100% - 4rem) 4rem); }
+}
+
+@keyframes expand-page {
+    from { clip-path: circle(0px at 50% 100%); }
+    to { clip-path: circle(150% at 50% 100%); }
 }
