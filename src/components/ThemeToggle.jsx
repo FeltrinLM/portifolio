@@ -32,7 +32,7 @@ function ÍconeMagico({ id, type, position, innerRef }) {
             style={style}
             {...listeners}
             {...attributes}
-            className={`w-10 h-10 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing hover:brightness-110 drop-shadow-lg bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
+            className={`w-10 h-10 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing hover:brightness-110 drop-shadow-lg bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
         >
             {type === 'sun' ? (
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none">
@@ -51,10 +51,10 @@ function CirculoReceptor({ isHovered, innerRef }) {
     return (
         <div
             ref={innerRef}
-            className={`absolute top-0 left-0 w-12 h-12 rounded-full border-[3px] transition-all duration-300 z-0 bg-[#91B09A]/10 backdrop-blur-sm pointer-events-auto ${
+            className={`absolute top-0 left-0 w-12 h-12 rounded-full border-[3px] transition-all duration-300 z-0 backdrop-blur-sm pointer-events-auto ${
                 isHovered
-                    ? 'border-[#a4c5ae] bg-[#91B09A]/30 scale-110 shadow-[0_0_20px_rgba(164,197,174,0.6)]'
-                    : 'border-dashed border-[#91B09A] shadow-[0_0_10px_rgba(145,176,154,0.2)] scale-100'
+                    ? 'border-[#4F2B33] dark:border-[#a4c5ae] bg-[#4F2B33]/30 dark:bg-[#91B09A]/30 scale-110 shadow-[0_0_20px_rgba(79,43,51,0.6)] dark:shadow-[0_0_20px_rgba(164,197,174,0.6)]'
+                    : 'border-dashed border-[#4F2B33] dark:border-[#91B09A] bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 shadow-[0_0_10px_rgba(79,43,51,0.2)] dark:shadow-[0_0_10px_rgba(145,176,154,0.2)] scale-100'
             }`}
         />
     );

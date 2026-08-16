@@ -11,10 +11,10 @@ const MAX_RADIUS = 304;
 const SNAP_DISTANCE = 248;
 
 const PIECES = [
-    { id: '/sobre', label: 'Sobre', gap: 14 },
-    { id: '/experiencia', label: 'Experiência', gap: 28 },
-    { id: '/projetos', label: 'Projetos', gap: 20 },
-    { id: '/contato', label: 'Contato', gap: 18 },
+    { id: '/sobre', label: { br: 'Sobre', en: 'About' }, gap: 14 },
+    { id: '/experiencia', label: { br: 'Experiência', en: 'Experience' }, gap: 28 },
+    { id: '/projetos', label: { br: 'Projetos', en: 'Projects' }, gap: 20 },
+    { id: '/contato', label: { br: 'Contato', en: 'Contact' }, gap: 18 },
 ];
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
@@ -117,7 +117,7 @@ function FragmentoDeMenu({ id, label, baseAngle, isActive, circleRotation, isSna
     );
 }
 
-export function Navbar() {
+export function Navbar({ language = 'br' }) {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -235,7 +235,7 @@ export function Navbar() {
                         <FragmentoDeMenu
                             key={piece.id}
                             id={piece.id}
-                            label={piece.label}
+                            label={piece.label[language]}
                             baseAngle={getTargetAngle(index, activeIndex)}
                             isActive={location.pathname === piece.id}
                             circleRotation={circleRotation}
