@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { DndContext, useDraggable } from '@dnd-kit/core';
 
 const MAGNETIC_RADIUS = 60;
-const DISTANCE_THRESHOLD = 95;
 
 function ÍconeMagico({ id, type, position, innerRef }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
@@ -61,9 +60,8 @@ function CirculoReceptor({ isHovered, innerRef }) {
     );
 }
 
-export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
+export function ThemeToggle({ isDarkMode, onThemeChange }) {
     const [isHovered, setIsHovered] = useState(false);
-    const inactiveIconRef = useRef(null);
     const circleRef = useRef(null);
 
     const [positions, setPositions] = useState({
@@ -86,41 +84,6 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
             document.documentElement.classList.remove('theme-transition');
         });
     }
-
-    useEffect(() => {
-        let frameId;
-        let lastX = null, lastY = null, lastVisible = null;
-
-        const trackIcon = () => {
-            if (inactiveIconRef.current && circleRef.current) {
-                const iconRect = inactiveIconRef.current.getBoundingClientRect();
-                const circleRect = circleRef.current.getBoundingClientRect();
-
-                const iconX = iconRect.left + iconRect.width / 2;
-                const iconY = iconRect.top + iconRect.height / 2;
-                const circleX = circleRect.left + circleRect.width / 2;
-                const circleY = circleRect.top + circleRect.height / 2;
-
-                const distance = Math.hypot(iconX - circleX, iconY - circleY);
-                const isVisible = distance > DISTANCE_THRESHOLD;
-
-                if (iconX !== lastX || iconY !== lastY || isVisible !== lastVisible) {
-                    setAura({
-                        x: iconX + window.scrollX,
-                        y: iconY + window.scrollY,
-                        visible: isVisible
-                    });
-                    lastX = iconX;
-                    lastY = iconY;
-                    lastVisible = isVisible;
-                }
-            }
-            frameId = requestAnimationFrame(trackIcon);
-        };
-
-        trackIcon();
-        return () => cancelAnimationFrame(frameId);
-    }, [setAura, isDarkMode, positions]);
 
     function handleDragMove(event) {
         const { active, delta } = event;
@@ -162,13 +125,11 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
                     id="light-mode"
                     type="sun"
                     position={positions['light-mode']}
-                    innerRef={isDarkMode ? inactiveIconRef : null}
                 />
                 <ÍconeMagico
                     id="dark-mode"
                     type="moon"
                     position={positions['dark-mode']}
-                    innerRef={!isDarkMode ? inactiveIconRef : null}
                 />
             </DndContext>
         </div>

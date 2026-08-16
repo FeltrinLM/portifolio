@@ -23,35 +23,20 @@ function ConteudoDasPaginas() {
 
 export default function App() {
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [aura, setAura] = useState({ x: 0, y: 0, visible: false });
 
     function handleThemeChange(newTheme) {
         setIsDarkMode(newTheme);
-        if (newTheme) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
     }
 
     return (
         <BrowserRouter>
-            <div className="relative min-h-screen overflow-x-hidden font-serif">
-                <div className={`min-h-screen ${isDarkMode ? 'dark bg-[#3B381E]' : 'bg-[#D0C697]'}`}>
-                    <ConteudoDasPaginas />
-                </div>
-                <div
-                    className={`absolute inset-0 pointer-events-none z-10 transition-opacity duration-500 ease-out ${!isDarkMode ? 'dark bg-[#3B381E]' : 'bg-[#D0C697]'} ${aura.visible ? 'opacity-100' : 'opacity-0'}`}
-                    style={{ clipPath: `circle(75px at ${aura.x}px ${aura.y}px)` }}
-                    aria-hidden="true"
-                >
-                    <ConteudoDasPaginas />
-                </div>
+            <div className={`relative min-h-screen overflow-x-hidden font-serif transition-colors duration-500 ${isDarkMode ? 'dark bg-[#3B381E]' : 'bg-[#D0C697]'}`}>
+                <ConteudoDasPaginas />
+
                 <div className="absolute inset-0 pointer-events-none z-50">
                     <ThemeToggle
                         isDarkMode={isDarkMode}
                         onThemeChange={handleThemeChange}
-                        setAura={setAura}
                     />
                     <div className="pointer-events-auto">
                         <Navbar />

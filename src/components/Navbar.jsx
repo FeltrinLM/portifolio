@@ -11,13 +11,14 @@ const MAX_RADIUS = 304;
 const SNAP_DISTANCE = 248;
 
 const PIECES = [
-    { id: '/sobre', label: 'Sobre', angle: -68 },
-    { id: '/experiencia', label: 'Experiência', angle: -24 },
-    { id: '/projetos', label: 'Projetos', angle: 24 },
-    { id: '/contato', label: 'Contato', angle: 68 },
+    { id: '/sobre', label: 'Sobre', gap: 14 },
+    { id: '/experiencia', label: 'Experiência', gap: 28 },
+    { id: '/projetos', label: 'Projetos', gap: 20 },
+    { id: '/contato', label: 'Contato', gap: 18 },
 ];
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
+const DOUBLE_RUNES = RUNES + " " + RUNES;
 
 function getPosition(angle, radius) {
     const rad = (angle * Math.PI) / 180;
@@ -27,14 +28,22 @@ function getPosition(angle, radius) {
     };
 }
 
-function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnapping }) {
+function getTargetAngle(index, activeIndex) {
+    if (index === activeIndex) return 0;
+    const inactiveIndices = [0, 1, 2, 3].filter(i => i !== activeIndex);
+    const pos = inactiveIndices.indexOf(index);
+    const angles = [-70, 0, 70];
+    return angles[pos];
+}
+
+function FragmentoDeMenu({ id, label, baseAngle, isActive, circleRotation, isSnapping }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id,
         disabled: isActive
     });
 
-    const currentBaseAngle = isActive ? circleRotation : angle;
-    const currentRadius = isActive ? CIRCLE_RADIUS + 7 : ORBIT_RADIUS;
+    const currentBaseAngle = isActive ? circleRotation : baseAngle;
+    const currentRadius = isActive ? CIRCLE_RADIUS : ORBIT_RADIUS;
     const { x: startX, y: startY } = getPosition(currentBaseAngle, currentRadius);
 
     let finalTransform = transform;
@@ -62,8 +71,8 @@ function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnappin
 
     const isGhosted = isActive && isSnapping;
     const dynamicClass = isActive
-        ? 'cursor-default text-[#a4c5ae] dark:text-[#a4c5ae]'
-        : 'cursor-grab active:cursor-grabbing hover:brightness-125';
+        ? 'cursor-default text-[#4F2B33] dark:text-[#a4c5ae]'
+        : 'cursor-grab active:cursor-grabbing hover:brightness-125 text-[#3B381E] dark:text-[#D0C697]';
 
     const style = {
         position: 'absolute',
@@ -84,22 +93,23 @@ function FragmentoDeMenu({ id, label, angle, isActive, circleRotation, isSnappin
             style={style}
             {...listeners}
             {...attributes}
-            className={`select-none text-[#2f3e35] dark:text-[#D0C697] touch-none drop-shadow-lg ${dynamicClass} ${isDragging ? '' : 'transition-all duration-500 ease-out'}`}
+            className={`select-none touch-none ${dynamicClass} ${isDragging ? '' : 'transition-all duration-500 ease-out'}`}
         >
             <svg width="112" height="48" viewBox="0 0 112 48" className="overflow-visible pointer-events-none fill-current">
-                <path id={`curve-${label}`} d="M -10,40 A 200,200 0 0,1 122,40" fill="none" />
+                <path id={`curve-${label}`} d="M -10,35.2 A 200,200 0 0,1 122,35.2" fill="none" />
                 <text
-                    fontSize={isActive ? "20" : "18"}
+                    fontSize={isActive ? "21" : "19"}
                     fontFamily="'Cormorant Garamond', serif"
                     fontWeight="700"
                     letterSpacing="2"
+                    dominantBaseline="middle"
                     style={{
-                        filter: isActive ? 'drop-shadow(0 0 10px rgba(164,197,174,0.8))' : 'none',
+                        filter: isActive ? 'drop-shadow(0 0 8px currentColor)' : 'none',
                         transition: 'all 0.3s'
                     }}
                 >
                     <textPath href={`#curve-${label}`} startOffset="50%" textAnchor="middle">
-                        {isActive ? `✦ ${label} ✦` : `✧ ${label} ✧`}
+                        {label}
                     </textPath>
                 </text>
             </svg>
@@ -111,15 +121,29 @@ export function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const [dragId, setDragId] = useState(null);
     const [circleRotation, setCircleRotation] = useState(0);
     const [isSnapping, setIsSnapping] = useState(false);
 
+    const activeIndex = Math.max(0, PIECES.findIndex(p => p.id === location.pathname));
+    const currentTargetId = isSnapping && dragId ? dragId : location.pathname;
+    const targetPiece = PIECES.find(p => p.id === currentTargetId) || PIECES[0];
+    const currentGap = targetPiece.gap;
+
+    const startGap = getPosition(currentGap, CIRCLE_RADIUS);
+    const endGap = getPosition(-currentGap, CIRCLE_RADIUS);
+
+    function handleDragStart(event) {
+        setDragId(event.active.id);
+    }
+
     function handleDragMove(event) {
         const { active, delta } = event;
-        const activePiece = PIECES.find(p => p.id === active.id);
-        if (!activePiece) return;
+        const pieceIndex = PIECES.findIndex(p => p.id === active.id);
+        if (pieceIndex === -1) return;
 
-        const { x: startX, y: startY } = getPosition(activePiece.angle, ORBIT_RADIUS);
+        const baseAngle = getTargetAngle(pieceIndex, activeIndex);
+        const { x: startX, y: startY } = getPosition(baseAngle, ORBIT_RADIUS);
         const dx = startX + delta.x - CENTER;
         const dy = CENTER - (startY + delta.y);
 
@@ -149,62 +173,70 @@ export function Navbar() {
         }
         setCircleRotation(0);
         setIsSnapping(false);
+        setDragId(null);
     }
-
-    const strokeColor = isSnapping ? "#a4c5ae" : "#91B09A";
 
     return (
         <nav className="fixed bottom-0 left-0 w-full h-[320px] flex justify-center z-50 pointer-events-none overflow-hidden">
             <div className="relative w-[640px] h-[640px] pointer-events-auto">
-                <DndContext onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
+                <DndContext onDragStart={handleDragStart} onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
                     <svg
                         width="640"
                         height="640"
-                        className="absolute top-0 left-0 transition-transform duration-150 ease-out"
+                        className={`absolute top-0 left-0 transition-transform duration-150 ease-out ${isSnapping ? 'text-[#4F2B33] dark:text-[#a4c5ae]' : 'text-[#4F2B33] dark:text-[#91B09A]'}`}
                         style={{
                             transform: `rotate(${circleRotation}deg)`,
                             transformOrigin: '320px 320px'
                         }}
                     >
-                        <circle
-                            cx="320" cy="320" r="215"
-                            fill="none"
-                            stroke={strokeColor}
-                            strokeWidth="1"
-                            strokeDasharray="4 12"
-                            className="animate-[spin_40s_linear_infinite] opacity-50"
-                            style={{ transformOrigin: '320px 320px' }}
-                        />
-                        <g className="animate-[spin_60s_linear_infinite_reverse] opacity-40 dark:opacity-30" style={{ transformOrigin: '320px 320px' }}>
-                            <path id="rune-path" d="M 320,135 A 185,185 0 1,1 319.9,135" fill="none" />
-                            <text fill="#91B09A" fontSize="12" letterSpacing="6">
-                                <textPath href="#rune-path" startOffset="0%">
+                        <g className="animate-[spin_40s_linear_infinite] opacity-50" style={{ transformOrigin: '320px 320px' }}>
+                            <path id="outer-rune-path" d="M 320,105 A 215,215 0 1,1 319.9,105" fill="none" />
+                            <text fill="currentColor" fontSize="14" letterSpacing="10" fontWeight="bold">
+                                <textPath href="#outer-rune-path" startOffset="0%">
+                                    {DOUBLE_RUNES}
+                                </textPath>
+                            </text>
+                        </g>
+
+                        <g className="animate-[spin_60s_linear_infinite_reverse] opacity-70" style={{ transformOrigin: '320px 320px' }}>
+                            <path id="inner-rune-path" d="M 320,135 A 185,185 0 1,1 319.9,135" fill="none" />
+                            <text fill="currentColor" fontSize="12" letterSpacing="8" fontWeight="bold">
+                                <textPath href="#inner-rune-path" startOffset="0%">
                                     {RUNES}
                                 </textPath>
                             </text>
                         </g>
+
                         <path
-                            d="M 375,127.8 A 200,200 0 1,1 265,127.8"
+                            d={`M ${startGap.x},${startGap.y} A 200,200 0 1,1 ${endGap.x},${endGap.y}`}
                             fill="none"
-                            stroke={strokeColor}
+                            stroke="currentColor"
                             strokeWidth="2"
                             strokeLinecap="round"
                             style={{
-                                filter: isSnapping ? 'drop-shadow(0 0 10px rgba(164,197,174,0.8))' : 'none',
+                                filter: isSnapping ? 'drop-shadow(0 0 8px currentColor)' : 'none',
                                 transition: 'all 0.3s'
                             }}
                         />
-                        <g fill={strokeColor} style={{ transition: 'all 0.3s' }}>
-                            <polygon points="375,123.8 379,127.8 375,131.8 371,127.8" />
-                            <polygon points="265,123.8 269,127.8 265,131.8 261,127.8" />
+
+                        <g fill="currentColor" style={{ transition: 'all 0.3s' }}>
+                            <polygon
+                                points="-4,0 0,-4 4,0 0,4"
+                                transform={`translate(${startGap.x}, ${startGap.y}) rotate(${currentGap})`}
+                            />
+                            <polygon
+                                points="-4,0 0,-4 4,0 0,4"
+                                transform={`translate(${endGap.x}, ${endGap.y}) rotate(${-currentGap})`}
+                            />
                         </g>
                     </svg>
-                    {PIECES.map(piece => (
+
+                    {PIECES.map((piece, index) => (
                         <FragmentoDeMenu
                             key={piece.id}
                             id={piece.id}
                             label={piece.label}
-                            angle={piece.angle}
+                            baseAngle={getTargetAngle(index, activeIndex)}
                             isActive={location.pathname === piece.id}
                             circleRotation={circleRotation}
                             isSnapping={isSnapping}
