@@ -2,22 +2,24 @@ import { useState, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { DndContext, useDraggable } from '@dnd-kit/core';
 
-// 1. Os Ícones Soltos
+const MAGNETIC_RADIUS = 60;
+const DISTANCE_THRESHOLD = 95;
+
 function ÍconeMagico({ id, type, position, innerRef }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
+
     let currentX = position.x;
     let currentY = position.y;
 
     if (transform && isDragging) {
-        currentX += transform.x;
-        currentY += transform.y;
-        currentX = Math.max(-window.innerWidth + 100, Math.min(20, currentX));
-        currentY = Math.max(-20, Math.min(window.innerHeight - 100, currentY));
+        currentX = Math.max(-window.innerWidth + 100, Math.min(20, position.x + transform.x));
+        currentY = Math.max(-20, Math.min(window.innerHeight - 100, position.y + transform.y));
     }
 
     const style = {
         position: 'absolute',
-        top: '4px', left: '4px',
+        top: '4px',
+        left: '4px',
         transform: `translate3d(${currentX}px, ${currentY}px, 0) scale(${isDragging ? 1.15 : 1})`,
         zIndex: isDragging ? 50 : 10,
     };
@@ -31,9 +33,7 @@ function ÍconeMagico({ id, type, position, innerRef }) {
             style={style}
             {...listeners}
             {...attributes}
-            className={`w-10 h-10 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing hover:brightness-110 drop-shadow-lg bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] ${
-                isDragging ? '' : 'transition-transform duration-300 ease-out'
-            }`}
+            className={`w-10 h-10 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing hover:brightness-110 drop-shadow-lg bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
         >
             {type === 'sun' ? (
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none">
@@ -48,7 +48,6 @@ function ÍconeMagico({ id, type, position, innerRef }) {
     );
 }
 
-// 2. O Caldeirão Mágico
 function CirculoReceptor({ isHovered, innerRef }) {
     return (
         <div
@@ -62,7 +61,6 @@ function CirculoReceptor({ isHovered, innerRef }) {
     );
 }
 
-// 3. Componente Principal
 export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
     const [isHovered, setIsHovered] = useState(false);
     const inactiveIconRef = useRef(null);
@@ -73,9 +71,6 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
         'dark-mode': { x: -70, y: 0 }
     });
 
-    const MAGNETIC_RADIUS = 60;
-
-    // Função de animação limpa e blindada para o TEMA
     function changeThemeWithAnimation(isDark) {
         if (!document.startViewTransition) {
             onThemeChange(isDark);
@@ -83,11 +78,8 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
         }
 
         document.documentElement.classList.add('theme-transition');
-
         const transition = document.startViewTransition(() => {
-            flushSync(() => {
-                onThemeChange(isDark);
-            });
+            flushSync(() => onThemeChange(isDark));
         });
 
         transition.finished.finally(() => {
@@ -97,6 +89,8 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
 
     useEffect(() => {
         let frameId;
+        let lastX = null, lastY = null, lastVisible = null;
+
         const trackIcon = () => {
             if (inactiveIconRef.current && circleRef.current) {
                 const iconRect = inactiveIconRef.current.getBoundingClientRect();
@@ -108,59 +102,51 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
                 const circleY = circleRect.top + circleRect.height / 2;
 
                 const distance = Math.hypot(iconX - circleX, iconY - circleY);
+                const isVisible = distance > DISTANCE_THRESHOLD;
 
-                setAura({
-                    x: iconX + window.scrollX,
-                    y: iconY + window.scrollY,
-                    visible: distance > 95
-                });
+                if (iconX !== lastX || iconY !== lastY || isVisible !== lastVisible) {
+                    setAura({
+                        x: iconX + window.scrollX,
+                        y: iconY + window.scrollY,
+                        visible: isVisible
+                    });
+                    lastX = iconX;
+                    lastY = iconY;
+                    lastVisible = isVisible;
+                }
             }
             frameId = requestAnimationFrame(trackIcon);
         };
-        trackIcon();
 
+        trackIcon();
         return () => cancelAnimationFrame(frameId);
-    }, [setAura]);
+    }, [setAura, isDarkMode, positions]);
 
     function handleDragMove(event) {
         const { active, delta } = event;
         const currentX = positions[active.id].x + delta.x;
         const currentY = positions[active.id].y + delta.y;
-        const distance = Math.sqrt(currentX * currentX + currentY * currentY);
-        setIsHovered(distance < MAGNETIC_RADIUS);
+        setIsHovered(Math.hypot(currentX, currentY) < MAGNETIC_RADIUS);
     }
 
     function handleDragEnd(event) {
         const { active, delta } = event;
-        let currentX = positions[active.id].x + delta.x;
-        let currentY = positions[active.id].y + delta.y;
+        const currentX = Math.max(-window.innerWidth + 100, Math.min(20, positions[active.id].x + delta.x));
+        const currentY = Math.max(-20, Math.min(window.innerHeight - 100, positions[active.id].y + delta.y));
 
-        currentX = Math.max(-window.innerWidth + 100, Math.min(20, currentX));
-        currentY = Math.max(-20, Math.min(window.innerHeight - 100, currentY));
-
-        const distance = Math.sqrt(currentX * currentX + currentY * currentY);
         setIsHovered(false);
 
-        // Se soltou dentro da área do círculo magnético
-        if (distance < MAGNETIC_RADIUS) {
-            if (active.id === 'light-mode') {
-                // Força a ir para o modo claro se puxou o sol
-                changeThemeWithAnimation(false);
-                setPositions(prev => ({
-                    'light-mode': { x: 0, y: 0 },
-                    'dark-mode': prev['dark-mode'].x === 0 && prev['dark-mode'].y === 0 ? { x: -70, y: 0 } : prev['dark-mode']
-                }));
-            } else if (active.id === 'dark-mode') {
-                // Força a ir para o modo escuro se puxou a lua
-                changeThemeWithAnimation(true);
-                setPositions(prev => ({
-                    'dark-mode': { x: 0, y: 0 },
-                    'light-mode': prev['light-mode'].x === 0 && prev['light-mode'].y === 0 ? { x: -70, y: 0 } : prev['light-mode']
-                }));
+        if (Math.hypot(currentX, currentY) < MAGNETIC_RADIUS) {
+            const isDraggingLight = active.id === 'light-mode';
+            if ((isDraggingLight && isDarkMode) || (!isDraggingLight && !isDarkMode)) {
+                changeThemeWithAnimation(!isDraggingLight);
             }
-        }
-        else {
-            // Se soltou fora, apenas atualiza a posição livremente na tela
+
+            setPositions(prev => ({
+                'light-mode': isDraggingLight ? { x: 0, y: 0 } : (prev['light-mode'].x === 0 && prev['light-mode'].y === 0 ? { x: -70, y: 0 } : prev['light-mode']),
+                'dark-mode': !isDraggingLight ? { x: 0, y: 0 } : (prev['dark-mode'].x === 0 && prev['dark-mode'].y === 0 ? { x: -70, y: 0 } : prev['dark-mode'])
+            }));
+        } else {
             setPositions(prev => ({
                 ...prev,
                 [active.id]: { x: currentX, y: currentY }
@@ -172,14 +158,12 @@ export function ThemeToggle({ isDarkMode, onThemeChange, setAura }) {
         <div className="fixed top-8 right-8 z-50 w-12 h-12 pointer-events-auto">
             <DndContext onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
                 <CirculoReceptor isHovered={isHovered} innerRef={circleRef} />
-
                 <ÍconeMagico
                     id="light-mode"
                     type="sun"
                     position={positions['light-mode']}
                     innerRef={isDarkMode ? inactiveIconRef : null}
                 />
-
                 <ÍconeMagico
                     id="dark-mode"
                     type="moon"
