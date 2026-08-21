@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { LanguageToggle } from './components/LanguageToggle';
+import { ResumeCard } from './components/ResumeCard'; // <-- Import da nossa Mini Carta de Tarô
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { Experience } from './pages/Experience';
@@ -37,7 +38,14 @@ export default function App() {
     return (
         <BrowserRouter>
             <div className={`relative min-h-screen overflow-x-hidden font-serif transition-colors duration-500 ${isDarkMode ? 'dark bg-[#3B381E]' : 'bg-[#D0C697]'}`}>
+
+                {/* O conteúdo principal do site (as páginas que mudam) */}
                 <ConteudoDasPaginas language={language} />
+
+                {/* --- WIDGETS GLOBAIS FLUTUANTES --- */}
+
+                {/* A carta de currículo fixa no canto inferior direito */}
+                <ResumeCard language={language} />
 
                 <div className="absolute inset-0 pointer-events-none z-50">
                     <ThemeToggle

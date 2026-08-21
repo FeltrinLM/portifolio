@@ -1,56 +1,131 @@
+import { useState, useEffect } from 'react';
 import { Text } from './Text';
-
-const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
-const DOUBLE_RUNES = RUNES + " " + RUNES;
 
 export function ResumeCard({ language = 'br', className = '' }) {
     const url = language === 'en' ? '/cv/cv_lorenzo_en.pdf' : '/cv/cv_lorenzo_br.pdf';
-    const title = language === 'en' ? 'Resume' : 'Currículo';
-    const subtitle = language === 'en' ? 'Download PDF' : 'Baixar PDF';
+
+    const [showBubble, setShowBubble] = useState(false);
+    const [messageIndex, setMessageIndex] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const messagesBr = ['Ei...', 'Eu tô aqui!', 'Clica em mim', 'Psiu...'];
+    const messagesEn = ['Hey...', 'I am here!', 'Click me', 'Psst...'];
+    const messages = language === 'en' ? messagesEn : messagesBr;
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setShowBubble(true);
+
+            setTimeout(() => {
+                setShowBubble(false);
+
+                setTimeout(() => {
+                    setMessageIndex((prev) => (prev + 1) % messages.length);
+                }, 500);
+            }, 3000);
+
+        }, 12000);
+
+        return () => clearInterval(interval);
+    }, [messages.length]);
 
     return (
         <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            // O ${className} permite que você ajuste margens ou tamanhos quando for colocá-lo em outras páginas
-            className={`group relative flex flex-col items-center justify-center gap-4 w-56 h-56 md:w-64 md:h-64 rounded-full border-2 border-[#4F2B33]/20 dark:border-[#91B09A]/20 bg-[#4F2B33]/[0.02] dark:bg-[#91B09A]/[0.02] backdrop-blur-md transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_15px_40px_-10px_rgba(79,43,51,0.2)] dark:hover:shadow-[0_15px_40px_-10px_rgba(145,176,154,0.1)] hover:bg-[#4F2B33]/5 dark:hover:bg-[#91B09A]/5 overflow-hidden ${className}`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            // HITBOX EXPANDIDA: w-28 h-40
+            className={`fixed right-4 md:right-8 bottom-0 z-[100] w-28 h-40 flex items-end justify-center group transition-all duration-700 ease-in-out translate-y-[45%] hover:-translate-y-4 hover:-rotate-[12deg] cursor-pointer ${className}`}
+            style={{ perspective: '1000px' }}
         >
-            {/* Runas Orbitando (Invisíveis até o hover) */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-500">
-                <svg width="100%" height="100%" viewBox="0 0 300 300" className="absolute animate-[spin_40s_linear_infinite] text-[#4F2B33]/60 dark:text-[#91B09A]/60">
-                    <path id="outer-circle-cv" d="M 150, 15 A 135,135 0 1,1 149.9,15" fill="none" />
-                    <text fill="currentColor" fontSize="11" letterSpacing="6" fontWeight="bold">
-                        <textPath href="#outer-circle-cv" startOffset="0%">
-                            {DOUBLE_RUNES}
-                        </textPath>
-                    </text>
-                </svg>
-                <svg width="100%" height="100%" viewBox="0 0 300 300" className="absolute animate-[spin_30s_linear_infinite_reverse] text-[#4F2B33]/80 dark:text-[#91B09A]/80">
-                    <path id="inner-circle-cv" d="M 150, 32 A 118,118 0 1,1 149.9,32" fill="none" />
-                    <text fill="currentColor" fontSize="9" letterSpacing="8" fontWeight="bold">
-                        <textPath href="#inner-circle-cv" startOffset="0%">
-                            {RUNES}
-                        </textPath>
-                    </text>
-                </svg>
+            {/* --- ESTILOS INJETADOS --- */}
+            <style>{`
+                @keyframes slow-3d-spin {
+                    0% { transform: rotateY(0deg); }
+                    100% { transform: rotateY(360deg); }
+                }
+                
+                @keyframes sparkle-float {
+                    0% { opacity: 0; transform: translateY(0px) scale(0) rotate(0deg); }
+                    50% { opacity: 0.8; transform: translateY(-15px) scale(1.2) rotate(90deg); }
+                    100% { opacity: 0; transform: translateY(-30px) scale(0) rotate(180deg); }
+                }
+                
+                .group:hover .spin-magic {
+                    animation: slow-3d-spin 5s linear infinite;
+                    animation-delay: 0.7s;
+                }
+
+                .group:hover .sparkle {
+                    animation: sparkle-float 2.5s ease-in-out infinite;
+                }
+                
+                .group:hover .s-1 { animation-delay: 0.7s; }
+                .group:hover .s-2 { animation-delay: 1.1s; }
+                .group:hover .s-3 { animation-delay: 1.8s; }
+                .group:hover .s-4 { animation-delay: 2.3s; }
+                .group:hover .s-5 { animation-delay: 2.9s; }
+                .group:hover .s-6 { animation-delay: 3.5s; }
+            `}</style>
+
+            {/* --- BALÃO DE FALA --- */}
+            {/* Subimos o balão para bottom-[85%] e aplicamos as cores do Dark Mode */}
+            <div
+                className={`absolute bottom-[85%] whitespace-nowrap px-3 py-1.5 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] text-[10px] md:text-[11px] font-bold rounded-lg shadow-lg transition-all duration-300 z-30 
+                ${showBubble && !isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}
+            >
+                {messages[messageIndex]}
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#4F2B33] dark:bg-[#91B09A] rotate-45"></div>
             </div>
 
-            {/* Ícone */}
-            <div className="relative z-10 w-14 h-14 rounded-full flex items-center justify-center bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] group-hover:scale-110 group-hover:bg-[#4F2B33] group-hover:text-[#D0C697] dark:group-hover:bg-[#91B09A] dark:group-hover:text-[#3B381E] transition-all duration-300">
-                <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <path d="M12 10v9m0 0l-3-3m3 3l3-3M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
-                </svg>
+            {/* --- ESTRELINHAS MÍSTICAS ESPALHADAS --- */}
+            {/* No Dark Mode, as estrelas brilham na cor #D0C697 */}
+            <div className="absolute inset-0 pointer-events-none z-0">
+                <span className="sparkle s-1 absolute top-[10%] left-[15%] text-[#4F2B33] dark:text-[#D0C697] text-[14px] opacity-0">✦</span>
+                <span className="sparkle s-2 absolute top-[35%] right-[5%] text-[#4F2B33] dark:text-[#D0C697] text-[10px] opacity-0">✦</span>
+                <span className="sparkle s-3 absolute bottom-[15%] left-[5%] text-[#4F2B33] dark:text-[#D0C697] text-[16px] opacity-0">✦</span>
+                <span className="sparkle s-4 absolute bottom-[10%] right-[15%] text-[#4F2B33] dark:text-[#D0C697] text-[12px] opacity-0">✦</span>
+                <span className="sparkle s-5 absolute top-[60%] left-[30%] text-[#4F2B33] dark:text-[#D0C697] text-[9px] opacity-0">✦</span>
+                <span className="sparkle s-6 absolute top-[5%] right-[25%] text-[#4F2B33] dark:text-[#D0C697] text-[11px] opacity-0">✦</span>
             </div>
 
-            {/* Textos */}
-            <div className="relative z-10 flex flex-col items-center gap-1 text-center px-4 max-w-[80%]">
-                <Text variant="title" as="h2" className="text-2xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
-                    {title}
-                </Text>
-                <Text variant="text" as="span" className="text-xs font-medium text-[#4F2B33]/70 dark:text-[#91B09A]/80 tracking-wide truncate w-full">
-                    {subtitle}
-                </Text>
+            {/* --- A CARTA 3D --- */}
+            <div
+                className="spin-magic relative w-14 h-24 md:w-16 md:h-28 z-20 mb-2"
+                style={{ transformStyle: 'preserve-3d' }}
+            >
+                {/* 1. FACE DA FRENTE */}
+                {/* O fundo da carta no dark mode vira #91B09A */}
+                <div
+                    className="absolute inset-0 flex flex-col items-center justify-start pt-3 gap-1.5 rounded-md md:rounded-lg border border-[#D0C697]/20 dark:border-[#3B381E]/20 bg-[#4F2B33] dark:bg-[#91B09A] shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden"
+                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                >
+                    {/* O Ícone no dark mode assume a cor do fundo do site (#3B381E) para contraste perfeito */}
+                    <div className="text-[#D0C697] dark:text-[#3B381E]">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+                            <circle cx="12" cy="9" r="3"/>
+                            <path d="M7 19c0-3.5 10-3.5 10 0"/>
+                        </svg>
+                    </div>
+                    <div className="flex flex-col items-center text-center px-1">
+                        <Text variant="title" as="span" className="text-[10px] md:text-[11px] font-bold text-[#D0C697] dark:text-[#3B381E] tracking-widest uppercase">
+                            CV
+                        </Text>
+                    </div>
+                </div>
+
+                {/* 2. FACE DE TRÁS (VERSO DA CARTA) */}
+                <div
+                    className="absolute inset-0 flex flex-col items-center justify-center rounded-md md:rounded-lg border border-[#D0C697]/20 dark:border-[#3B381E]/20 bg-[#4F2B33] dark:bg-[#91B09A] shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden"
+                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                >
+                    <div className="w-[85%] h-[90%] border border-[#D0C697]/10 dark:border-[#3B381E]/20 rounded-sm flex items-center justify-center">
+                        <span className="text-[#D0C697]/40 dark:text-[#3B381E]/40 text-sm">✦</span>
+                    </div>
+                </div>
             </div>
         </a>
     );
