@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Text } from '../components/Text';
-import { BackgroundCarousel } from '../components/BackgroundCarousel';
+// import { BackgroundCarousel } from '../components/BackgroundCarousel';
 import fotoPerfil from '../assets/good_looking.jpeg';
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
@@ -65,10 +65,10 @@ export function About({ language = 'br' }) {
     ];
 
     const renderSkillTag = (skill) => {
-        // hover:scale-105 e inline-block garantem o "bump" suave em todas as tags
         const baseClass = "px-3 py-1.5 rounded-lg text-sm cursor-default transition-all duration-300 hover:scale-105 inline-block";
 
-        const normalClass = "border border-[#4F2B33]/30 dark:border-[#91B09A]/30 text-[#4F2B33] dark:text-[#D0C697] hover:bg-[#4F2B33] hover:text-[#D0C697] dark:hover:bg-[#91B09A] dark:hover:text-[#3B381E]";
+        // CORREÇÃO: dark:text-[#D0C697] mantido
+        const normalClass = "border border-[#4F2B33]/30 dark:border-[#91B09A]/40 text-[#4F2B33] dark:text-[#D0C697] hover:bg-[#4F2B33] hover:text-[#D0C697] dark:hover:bg-[#91B09A] dark:hover:text-[#3B381E]";
 
         const highlightClass = "bg-[#4F2B33] text-[#D0C697] dark:bg-[#91B09A] dark:text-[#3B381E] font-bold shadow-md";
 
@@ -94,7 +94,7 @@ export function About({ language = 'br' }) {
                 <div className="absolute z-0 w-64 h-64 md:w-96 md:h-96 top-[20vh] bg-[#4F2B33]/20 dark:bg-[#91B09A]/15 blur-[80px] rounded-full pointer-events-none"></div>
 
                 <div className="relative w-full max-w-5xl flex items-center justify-center mb-8 pointer-events-auto">
-                    <BackgroundCarousel language={language} />
+                    {/* <BackgroundCarousel language={language} /> */}
 
                     <div className="relative z-10 flex items-center justify-center w-72 h-72 md:w-80 md:h-80">
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -155,6 +155,7 @@ export function About({ language = 'br' }) {
                             </div>
 
                             <div className="flex flex-col gap-6 text-[#4F2B33]/90 dark:text-[#D0C697]/90 text-lg leading-relaxed font-medium">
+                                {/* CORREÇÃO: Tags strong com dark:text-[#D0C697] */}
                                 <Text variant="text" as="p">
                                     {language === 'en'
                                         ? <>I consider <strong className="text-[#4F2B33] dark:text-[#D0C697] font-bold">Dr. House</strong> one of the best-written characters in TV history. My favorite episodes are... Wait, you're not here to read about that, right? Let's talk about what matters: I am an <strong className="text-[#4F2B33] dark:text-[#D0C697] font-bold">Internet Systems</strong> student at UFSM. If you haven't heard of it, you should. It's the most software-development-focused degree at the institution, and it's exactly where I fell in love with this world.</>
@@ -187,7 +188,8 @@ export function About({ language = 'br' }) {
                                             </svg>
                                         </div>
                                         <div className="flex flex-col">
-                                            <Text variant="text" className="text-[10px] font-bold tracking-widest opacity-60 uppercase">{card.label}</Text>
+                                            {/* CORREÇÃO: Adicionado text-[#4F2B33] dark:text-[#D0C697] nos títulos menores */}
+                                            <Text variant="text" className="text-[10px] font-bold tracking-widest opacity-60 uppercase text-[#4F2B33] dark:text-[#D0C697]">{card.label}</Text>
                                             <Text variant="text" className="text-sm font-bold text-[#4F2B33] dark:text-[#D0C697]">{card.value}</Text>
                                         </div>
                                     </div>
@@ -206,7 +208,8 @@ export function About({ language = 'br' }) {
                                     <div className="flex flex-col gap-6">
 
                                         <div className="flex flex-col gap-3">
-                                            <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase">
+                                            {/* CORREÇÃO: Adicionado text-[#4F2B33] dark:text-[#D0C697] nos subtítulos de categoria */}
+                                            <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase text-[#4F2B33] dark:text-[#D0C697]">
                                                 {language === 'en' ? 'Languages' : 'Linguagens'}
                                             </Text>
                                             <div className="flex flex-wrap gap-2">
@@ -215,7 +218,8 @@ export function About({ language = 'br' }) {
                                         </div>
 
                                         <div className="flex flex-col gap-3">
-                                            <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase">
+                                            {/* CORREÇÃO: Adicionado text-[#4F2B33] dark:text-[#D0C697] nos subtítulos de categoria */}
+                                            <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase text-[#4F2B33] dark:text-[#D0C697]">
                                                 Frameworks
                                             </Text>
                                             <div className="flex flex-wrap gap-2">
@@ -224,7 +228,8 @@ export function About({ language = 'br' }) {
                                         </div>
 
                                         <div className="flex flex-col gap-3">
-                                            <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase">
+                                            {/* CORREÇÃO: Adicionado text-[#4F2B33] dark:text-[#D0C697] nos subtítulos de categoria */}
+                                            <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase text-[#4F2B33] dark:text-[#D0C697]">
                                                 {language === 'en' ? 'Tools' : 'Ferramentas'}
                                             </Text>
                                             <div className="flex flex-wrap gap-2">
@@ -257,6 +262,7 @@ export function About({ language = 'br' }) {
                                                     />
                                                 </svg>
                                                 <div className="absolute inset-0 flex items-center justify-center">
+                                                    {/* CORREÇÃO: Garantindo o dark:text-[#D0C697] */}
                                                     <Text variant="text" className="text-[10px] font-bold text-[#4F2B33] dark:text-[#D0C697] uppercase tracking-widest">
                                                         {language === 'en' ? 'Native' : 'Nativo'}
                                                     </Text>
@@ -282,6 +288,7 @@ export function About({ language = 'br' }) {
                                                     />
                                                 </svg>
                                                 <div className="absolute inset-0 flex items-center justify-center mt-1">
+                                                    {/* CORREÇÃO: Garantindo o dark:text-[#D0C697] */}
                                                     <Text variant="title" className="text-xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                                                         C1
                                                     </Text>

@@ -40,31 +40,28 @@ export function Contact({ language = 'br' }) {
     ];
 
     return (
-        // Aumentei o pb-[360px] para empurrar toda a seção mais para o alto, longe da Navbar
-        <div className="relative min-h-screen flex flex-col items-center justify-center px-6 pb-[360px] pt-8 w-full overflow-hidden">
+        <div className="relative min-h-screen flex flex-col items-center justify-start px-6 pb-[360px] pt-4 w-full overflow-hidden">
 
-            <div className="absolute z-0 w-72 h-72 md:w-[600px] md:h-[600px] bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 blur-[120px] rounded-full pointer-events-none"></div>
+            {/* Blur reduzido em tamanho e intensidade para não tocar as bordas */}
+            <div className="absolute top-10 z-0 w-56 h-56 md:w-[400px] md:h-[400px] bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 blur-[80px] rounded-full pointer-events-none"></div>
 
-            <div className="relative z-10 flex flex-col items-center gap-10 w-full max-w-4xl mx-auto">
-
-                <div className="flex flex-col items-center gap-4 text-center">
-                    <Text variant="title" as="h1" className="text-5xl md:text-7xl font-bold text-[#4F2B33] dark:text-[#D0C697] tracking-wide">
-                        {language === 'en' ? 'Contact' : 'Contato'}
+            <div className="relative z-20 flex flex-col items-center gap-2 text-center w-full max-w-6xl mx-auto shrink-0">
+                <Text variant="title" as="h1" className="text-5xl md:text-6xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
+                    {language === 'en' ? 'Contact' : 'Contato'}
+                </Text>
+                <div className="flex items-center gap-3 text-[#4F2B33]/80 dark:text-[#91B09A]/90 mt-2">
+                    <div className="w-10 h-px bg-current opacity-40"></div>
+                    <Text variant="text" as="p" className="text-xl">
+                        {language === 'en' ? "So, let's talk?" : 'E aí, vamos conversar?'}
                     </Text>
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-px bg-[#4F2B33]/30 dark:bg-[#91B09A]/30"></div>
-                        <Text variant="text" as="p" className="text-lg md:text-xl text-[#4F2B33]/80 dark:text-[#91B09A] tracking-widest uppercase font-bold text-center">
-                            {language === 'en' ? "So, let's talk?" : 'E aí, vamos conversar?'}
-                        </Text>
-                        <div className="w-12 h-px bg-[#4F2B33]/30 dark:bg-[#91B09A]/30"></div>
-                    </div>
+                    <div className="w-10 h-px bg-current opacity-40"></div>
                 </div>
+            </div>
 
-                {/* Container das Cartas em formato de Leque */}
-                <div className="relative w-full h-72 md:h-80 flex justify-center mt-8">
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
+                <div className="relative w-full h-72 md:h-80 flex justify-center">
                     {contactLinks.map((link, index) => {
 
-                        // O Wrapper define o ângulo e a posição estática da carta na mão
                         let wrapperClasses = "";
                         if (index === 0) wrapperClasses = "z-10 -translate-x-16 md:-translate-x-28 translate-y-6 md:translate-y-8 -rotate-[14deg]";
                         if (index === 1) wrapperClasses = "z-20";
@@ -79,22 +76,18 @@ export function Contact({ language = 'br' }) {
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    // A carta agora desliza pelo eixo Y (que mantém o ângulo graças ao Wrapper) e retorna a usar o fundo de vidro original.
-                                    className="relative flex flex-col items-center justify-center py-10 px-4 w-48 h-72 md:w-56 md:h-80 rounded-2xl md:rounded-3xl border border-[#4F2B33]/30 dark:border-[#91B09A]/30 bg-gradient-to-br from-[#4F2B33]/[0.05] to-transparent dark:from-[#91B09A]/[0.05] dark:to-transparent backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] transition-all duration-300 ease-out group-hover:-translate-y-12 md:group-hover:-translate-y-16 group-hover:shadow-[0_20px_50px_-10px_rgba(79,43,51,0.4)] dark:group-hover:shadow-[0_20px_50px_-10px_rgba(145,176,154,0.2)] overflow-hidden"
+                                    // Sombras mantidas suaves como na correção anterior
+                                    className="relative flex flex-col items-center justify-center py-10 px-4 w-48 h-72 md:w-56 md:h-80 rounded-2xl md:rounded-3xl border border-[#4F2B33]/30 dark:border-[#91B09A]/30 bg-gradient-to-br from-[#4F2B33]/[0.05] to-transparent dark:from-[#91B09A]/[0.05] dark:to-transparent backdrop-blur-xl shadow-[0_8px_30px_rgba(79,43,51,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] transition-all duration-300 ease-out group-hover:-translate-y-12 md:group-hover:-translate-y-16 group-hover:shadow-[0_20px_40px_-10px_rgba(79,43,51,0.12)] dark:group-hover:shadow-[0_20px_40px_-10px_rgba(145,176,154,0.1)] overflow-hidden"
                                 >
                                     {/* --- BORDAS ESTILO TARÔ E RUNAS (Desktop) --- */}
                                     <svg viewBox="0 0 224 320" className="absolute inset-0 w-full h-full hidden md:block text-[#4F2B33]/50 dark:text-[#91B09A]/40 pointer-events-none">
                                         <rect x="10" y="10" width="204" height="300" rx="12" fill="none" stroke="currentColor" strokeWidth="1.5" />
                                         <rect x="28" y="28" width="168" height="264" rx="8" fill="none" stroke="currentColor" strokeWidth="1" />
-
-                                        {/* Caminho perfeitamente centralizado entre as bordas */}
                                         <path id={`desktop-path-${index}`} d="M 23,33 A 10,10 0 0 1 33,23 H 191 A 10,10 0 0 1 201,33 V 287 A 10,10 0 0 1 191,297 H 33 A 10,10 0 0 1 23,287 Z" fill="none" />
 
-                                        {/* Texto Estático */}
                                         <text fill="currentColor" fontSize="8" letterSpacing="4" className="opacity-100 group-hover:opacity-0 transition-opacity duration-500">
                                             <textPath href={`#desktop-path-${index}`} startOffset="0%">{RUNES_REPEAT}</textPath>
                                         </text>
-                                        {/* Texto Animado */}
                                         <text fill="currentColor" fontSize="8" letterSpacing="4" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                                             <textPath href={`#desktop-path-${index}`} startOffset="0%">
                                                 {RUNES_REPEAT}
@@ -141,7 +134,6 @@ export function Contact({ language = 'br' }) {
                         );
                     })}
                 </div>
-
             </div>
         </div>
     );

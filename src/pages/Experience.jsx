@@ -47,7 +47,6 @@ export function Experience({ language = 'br' }) {
             if (newIndex >= 0 && newIndex < experiences.length) {
                 isScrolling.current = true;
                 setActiveIndex(newIndex);
-                // TIMEOUT REDUZIDO DE 800ms PARA 350ms (Remove o travamento)
                 setTimeout(() => (isScrolling.current = false), 350);
             }
         };
@@ -57,7 +56,7 @@ export function Experience({ language = 'br' }) {
     }, [activeIndex]);
 
     return (
-        <div className="fixed inset-0 pt-24 md:pt-32 pb-6 px-6 bg-[#D0C697] dark:bg-[#3B381E] overflow-hidden flex flex-col items-center justify-start">
+        <div className="fixed inset-0 pt-8 md:pt-12 pb-6 px-6 bg-[#D0C697] dark:bg-[#3B381E] overflow-hidden flex flex-col items-center justify-start">
             <div className="absolute z-0 w-[600px] h-[600px] top-10 -right-20 bg-[#4F2B33]/5 dark:bg-[#91B09A]/5 blur-[120px] rounded-full pointer-events-none" />
 
             <div className="relative z-20 flex flex-col items-center gap-2 text-center w-full max-w-6xl mx-auto px-6 shrink-0">
@@ -66,14 +65,16 @@ export function Experience({ language = 'br' }) {
                 </Text>
                 <div className="flex items-center gap-3 text-[#4F2B33]/80 dark:text-[#91B09A]/90">
                     <div className="w-10 h-px bg-current opacity-40" />
-                    <Text variant="text" as="p" className="text-xl tracking-widest uppercase">
-                        {language === 'en' ? 'The journey so far' : 'A jornada até aqui'}
+                    {/* Removida a classe uppercase e texto ajustado para Iniciais Maiúsculas */}
+                    <Text variant="text" as="p" className="text-xl tracking-widest">
+                        {language === 'en' ? 'The Journey So Far' : 'A Jornada Até Aqui'}
                     </Text>
                     <div className="w-10 h-px bg-current opacity-40" />
                 </div>
             </div>
 
-            <div className="relative w-full max-w-4xl h-[500px] md:h-[400px] mt-16 md:mt-20 shrink-0">
+            {/* Margem superior ajustada de mt-10 md:mt-14 para mt-14 md:mt-16 para baixar um pouco os cards */}
+            <div className="relative w-full max-w-4xl h-[500px] md:h-[400px] mt-14 md:mt-16 shrink-0">
                 <div className="absolute -left-6 md:-left-12 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-30">
                     {experiences.map((_, i) => (
                         <div key={i} className={`rounded-full transition-all duration-300 ${activeIndex === i ? 'w-2 h-6 bg-[#4F2B33] dark:bg-[#91B09A]' : 'w-2 h-2 bg-[#4F2B33]/30 dark:bg-[#91B09A]/30'}`} />

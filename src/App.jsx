@@ -1,13 +1,25 @@
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { LanguageToggle } from './components/LanguageToggle';
-import { ResumeCard } from './components/ResumeCard'; // <-- Import da nossa Mini Carta de Tarô
+import { ResumeCard } from './components/ResumeCard';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { Experience } from './pages/Experience';
 import { Projects } from './pages/Projects';
+
+// --- COMPONENTE NOVO QUE RESOLVE O SCROLL ---
+function ScrollToTop() {
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]); // Sempre que o pathname (URL) mudar, ele roda esse useEffect
+
+    return null; // Não renderiza nada visualmente
+}
+// ---------------------------------------------
 
 function ConteudoDasPaginas({ language }) {
     return (
@@ -37,6 +49,9 @@ export default function App() {
 
     return (
         <BrowserRouter>
+            {/* O componente precisa ficar dentro do BrowserRouter para ter acesso ao useLocation */}
+            <ScrollToTop />
+
             <div className={`relative min-h-screen overflow-x-hidden font-serif transition-colors duration-500 ${isDarkMode ? 'dark bg-[#3B381E]' : 'bg-[#D0C697]'}`}>
 
                 {/* O conteúdo principal do site (as páginas que mudam) */}
