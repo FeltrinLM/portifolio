@@ -2,12 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Text } from '../components/Text';
 
-// Ícones compactados
 const LocationIcon = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
 const BriefcaseIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>;
 const ProfileIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>;
 
-// Dados movidos para fora (evita recriação a cada render)
 const experiences = [
     {
         roleBr: 'Engenheiro de Software e Gerente de Projetos', roleEn: 'Software Engineer & Project Manager',
@@ -41,7 +39,6 @@ export function Experience({ language = 'br' }) {
         const handleWheel = (e) => {
             if (isScrolling.current) return;
 
-            // Math.sign simplifica a direção (+1 desce, -1 sobe)
             const newIndex = activeIndex + Math.sign(e.deltaY);
 
             if (newIndex >= 0 && newIndex < experiences.length) {
@@ -56,7 +53,7 @@ export function Experience({ language = 'br' }) {
     }, [activeIndex]);
 
     return (
-        <div className="fixed inset-0 pt-8 md:pt-12 pb-6 px-6 bg-[#D0C697] dark:bg-[#3B381E] overflow-hidden flex flex-col items-center justify-start">
+        <div className="fixed inset-0 pt-8 md:pt-12 pb-6 px-6 bg-[#D0C697] dark:bg-[#272516] overflow-hidden flex flex-col items-center justify-start">
             <div className="absolute z-0 w-[600px] h-[600px] top-10 -right-20 bg-[#4F2B33]/5 dark:bg-[#91B09A]/5 blur-[120px] rounded-full pointer-events-none" />
 
             <div className="relative z-20 flex flex-col items-center gap-2 text-center w-full max-w-6xl mx-auto px-6 shrink-0">
@@ -65,7 +62,6 @@ export function Experience({ language = 'br' }) {
                 </Text>
                 <div className="flex items-center gap-3 text-[#4F2B33]/80 dark:text-[#91B09A]/90">
                     <div className="w-10 h-px bg-current opacity-40" />
-                    {/* Removida a classe uppercase e texto ajustado para Iniciais Maiúsculas */}
                     <Text variant="text" as="p" className="text-xl tracking-widest">
                         {language === 'en' ? 'The Journey So Far' : 'A Jornada Até Aqui'}
                     </Text>
@@ -73,7 +69,6 @@ export function Experience({ language = 'br' }) {
                 </div>
             </div>
 
-            {/* Margem superior ajustada de mt-10 md:mt-14 para mt-14 md:mt-16 para baixar um pouco os cards */}
             <div className="relative w-full max-w-4xl h-[500px] md:h-[400px] mt-14 md:mt-16 shrink-0">
                 <div className="absolute -left-6 md:-left-12 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-30">
                     {experiences.map((_, i) => (
@@ -94,7 +89,7 @@ export function Experience({ language = 'br' }) {
                             animate={state}
                             transition={{ type: 'spring', stiffness: 150, damping: 22 }}
                             style={{ transformStyle: 'preserve-3d', WebkitFontSmoothing: 'antialiased' }}
-                            className="absolute top-0 left-0 right-0 w-full rounded-2xl border border-[#4F2B33]/20 dark:border-[#91B09A]/30 bg-[#D0C697] dark:bg-[#3B381E] p-6 md:p-8 shadow-xl"
+                            className="absolute top-0 left-0 right-0 w-full rounded-2xl border border-[#4F2B33]/20 dark:border-[#91B09A]/30 bg-[#D0C697] dark:bg-[#272516] p-6 md:p-8 shadow-xl"
                         >
                             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 w-full">
                                 <div className="flex flex-col">
@@ -102,7 +97,7 @@ export function Experience({ language = 'br' }) {
                                         {language === 'en' ? exp.roleEn : exp.roleBr}
                                     </Text>
                                     <div className="flex flex-wrap items-center gap-2 font-bold text-lg text-[#4F2B33]/90 dark:text-[#91B09A] mt-1">
-                                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#D0C697] dark:bg-[#3B381E] border border-[#4F2B33]/20 dark:border-[#91B09A]/20 shadow-inner">
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#D0C697] dark:bg-[#272516] border border-[#4F2B33]/20 dark:border-[#91B09A]/20 shadow-inner">
                                             {exp.icon}
                                         </div>
                                         <span>{exp.company}</span>
@@ -125,7 +120,7 @@ export function Experience({ language = 'br' }) {
 
                             <div className="flex flex-wrap gap-2 pt-5 mt-4 border-t border-[#4F2B33]/10 dark:border-[#91B09A]/10">
                                 {exp.tags.map((tag, tagIndex) => (
-                                    <div key={tagIndex} className="px-4 py-1.5 rounded-md bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] text-xs font-bold tracking-wider shadow-sm">{tag}
+                                    <div key={tagIndex} className="px-4 py-1.5 rounded-md bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] text-xs font-bold tracking-wider shadow-sm">{tag}
                                     </div>
                                 ))}
                             </div>

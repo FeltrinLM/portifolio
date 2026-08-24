@@ -9,17 +9,15 @@ import { Contact } from './pages/Contact';
 import { Experience } from './pages/Experience';
 import { Projects } from './pages/Projects';
 
-// --- COMPONENTE NOVO QUE RESOLVE O SCROLL ---
 function ScrollToTop() {
     const { pathname } = useLocation();
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, [pathname]); // Sempre que o pathname (URL) mudar, ele roda esse useEffect
+    }, [pathname]);
 
-    return null; // Não renderiza nada visualmente
+    return null;
 }
-// ---------------------------------------------
 
 function ConteudoDasPaginas({ language }) {
     return (
@@ -49,17 +47,12 @@ export default function App() {
 
     return (
         <BrowserRouter>
-            {/* O componente precisa ficar dentro do BrowserRouter para ter acesso ao useLocation */}
             <ScrollToTop />
 
-            <div className={`relative min-h-screen overflow-x-hidden font-serif transition-colors duration-500 ${isDarkMode ? 'dark bg-[#3B381E]' : 'bg-[#D0C697]'}`}>
+            <div className={`relative min-h-screen overflow-x-hidden font-serif transition-colors duration-500 ${isDarkMode ? 'dark bg-[#272516]' : 'bg-[#D0C697]'}`}>
 
-                {/* O conteúdo principal do site (as páginas que mudam) */}
                 <ConteudoDasPaginas language={language} />
 
-                {/* --- WIDGETS GLOBAIS FLUTUANTES --- */}
-
-                {/* A carta de currículo fixa no canto inferior direito */}
                 <ResumeCard language={language} />
 
                 <div className="absolute inset-0 pointer-events-none z-50">

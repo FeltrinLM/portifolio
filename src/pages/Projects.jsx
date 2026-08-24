@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Text } from '../components/Text';
 
-// Ícones
 const SparkleIcon = () => (
     <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
         <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" />
@@ -14,7 +13,6 @@ const GitHubIcon = () => (
     </svg>
 );
 
-// Dados dos projetos
 const projects = [
     {
         title: 'Journey',
@@ -37,7 +35,7 @@ const projects = [
         descriptionBr: 'Sistema criado para gerenciar e promover os eventos, exposições e workshops oferecidos ao público pelo laboratório LENPA da Universidade Federal de Santa Maria (UFSM). Toda a infraestrutura do projeto foi isolada e orquestrada utilizando Docker.',
         descriptionEn: 'System created to manage and promote events, exhibitions, and workshops offered to the public by the LENPA laboratory at the Federal University of Santa Maria (UFSM). The entire project infrastructure was isolated and orchestrated using Docker.',
         tags: ['Java (Spring)', 'PostgreSQL', 'Angular', 'Docker'],
-        featured: true, // DESTAQUE ATIVADO
+        featured: true,
         links: [
             { label: 'Backend', url: 'https://github.com/FeltrinLM/LENPA_backend' },
             { label: 'Frontend', url: 'https://github.com/FeltrinLM/LENPA-frontend' }
@@ -55,7 +53,6 @@ const projects = [
     }
 ];
 
-// Animações
 const containerVariants = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.2 } }
@@ -68,12 +65,10 @@ const cardVariants = {
 
 export function Projects({ language = 'br' }) {
     return (
-        <div className="min-h-screen pt-4 pb-[600px] px-6 bg-[#D0C697] dark:bg-[#3B381E] flex flex-col items-center">
+        <div className="min-h-screen pt-4 pb-[600px] px-6 bg-[#D0C697] dark:bg-[#272516] flex flex-col items-center">
 
             <div className="absolute z-0 w-[500px] h-[500px] top-20 -left-20 bg-[#4F2B33]/5 dark:bg-[#91B09A]/5 blur-[120px] rounded-full pointer-events-none" />
 
-            {/* Cabeçalho */}
-            {/* Margem inferior ajustada cirurgicamente para mb-[59px] (5 pixels a menos que o anterior) */}
             <div className="relative z-20 flex flex-col items-center gap-2 text-center w-full max-w-6xl mx-auto shrink-0 mb-[40px]">
                 <Text variant="title" as="h1" className="text-5xl md:text-6xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                     {language === 'en' ? 'My Projects' : 'Meus Projetos'}
@@ -87,7 +82,6 @@ export function Projects({ language = 'br' }) {
                 </div>
             </div>
 
-            {/* Grid de Projetos */}
             <motion.div
                 variants={containerVariants}
                 initial="hidden"
@@ -109,14 +103,12 @@ export function Projects({ language = 'br' }) {
                             }
                             `}
                         >
-                            {/* Etiqueta de Destaque Arcana */}
                             {isFeatured && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] px-5 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold shadow-md whitespace-nowrap">
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] px-5 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold shadow-md whitespace-nowrap">
                                     {language === 'en' ? 'Magnum Opus' : 'Magnum Opus'}
                                 </div>
                             )}
 
-                            {/* Estrela Mágica no Canto */}
                             <div className={`absolute top-6 right-6 transition-colors duration-300 ${isFeatured ? 'text-[#4F2B33] dark:text-[#91B09A] animate-pulse' : 'text-[#4F2B33]/20 dark:text-[#91B09A]/30 group-hover:text-[#4F2B33] dark:group-hover:text-[#91B09A]'}`}>
                                 <SparkleIcon />
                             </div>
@@ -135,7 +127,6 @@ export function Projects({ language = 'br' }) {
                                     {language === 'en' ? project.descriptionEn : project.descriptionBr}
                                 </Text>
 
-                                {/* Tags */}
                                 <div className="flex flex-wrap gap-1.5 mt-2">
                                     {project.tags.map((tag, tagIndex) => (
                                         <div key={tagIndex} className="px-3 py-1 rounded bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] text-[10px] font-bold tracking-wider uppercase">
@@ -145,7 +136,6 @@ export function Projects({ language = 'br' }) {
                                 </div>
                             </div>
 
-                            {/* Links do GitHub */}
                             {project.links.length > 0 && (
                                 <div className="flex flex-wrap gap-2 pt-5 mt-6 border-t border-[#4F2B33]/15 dark:border-[#91B09A]/20">
                                     {project.links.map((link, linkIndex) => (
@@ -154,7 +144,7 @@ export function Projects({ language = 'br' }) {
                                             href={link.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] text-[11px] font-bold tracking-wider hover:-translate-y-0.5 transition-transform shadow-sm"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] text-[11px] font-bold tracking-wider hover:-translate-y-0.5 transition-transform shadow-sm"
                                         >
                                             <GitHubIcon />
                                             {link.label}
