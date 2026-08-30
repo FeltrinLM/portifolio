@@ -4,15 +4,15 @@ import { DndContext, useDraggable } from '@dnd-kit/core';
 
 const MAGNETIC_RADIUS = 60;
 
-function ÍconeMagico({ id, type, position, innerRef }) {
+function IconeMagico({ id, type, position, innerRef }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
 
     let currentX = position.x;
     let currentY = position.y;
 
     if (transform && isDragging) {
-        currentX = Math.max(-window.innerWidth + 100, Math.min(20, position.x + transform.x));
-        currentY = Math.max(-20, Math.min(window.innerHeight - 100, position.y + transform.y));
+        currentX = Math.max(-window.innerWidth, Math.min(window.innerWidth, position.x + transform.x));
+        currentY = Math.max(-window.innerHeight, Math.min(window.innerHeight, position.y + transform.y));
     }
 
     const style = {
@@ -60,13 +60,13 @@ function CirculoReceptor({ isHovered, innerRef }) {
     );
 }
 
-export function ThemeToggle({ isDarkMode, onThemeChange }) {
+export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false }) {
     const [isHovered, setIsHovered] = useState(false);
     const circleRef = useRef(null);
 
     const [positions, setPositions] = useState({
-        'light-mode': { x: 0, y: 0 },
-        'dark-mode': { x: -70, y: 0 }
+        'light-mode': isDarkMode ? { x: -70, y: 0 } : { x: 0, y: 0 },
+        'dark-mode': isDarkMode ? { x: 0, y: 0 } : { x: -70, y: 0 }
     });
 
     function changeThemeWithAnimation(isDark) {
@@ -94,8 +94,8 @@ export function ThemeToggle({ isDarkMode, onThemeChange }) {
 
     function handleDragEnd(event) {
         const { active, delta } = event;
-        const currentX = Math.max(-window.innerWidth + 100, Math.min(20, positions[active.id].x + delta.x));
-        const currentY = Math.max(-20, Math.min(window.innerHeight - 100, positions[active.id].y + delta.y));
+        const currentX = Math.max(-window.innerWidth, Math.min(window.innerWidth, positions[active.id].x + delta.x));
+        const currentY = Math.max(-window.innerHeight, Math.min(window.innerHeight, positions[active.id].y + delta.y));
 
         setIsHovered(false);
 
@@ -110,27 +110,34 @@ export function ThemeToggle({ isDarkMode, onThemeChange }) {
                 'dark-mode': !isDraggingLight ? { x: 0, y: 0 } : (prev['dark-mode'].x === 0 && prev['dark-mode'].y === 0 ? { x: -70, y: 0 } : prev['dark-mode'])
             }));
         } else {
-            setPositions(prev => ({
-                ...prev,
-                [active.id]: { x: currentX, y: currentY }
-            }));
+            // MUDANÇA AQUI: Efeito Elástico!
+            // Se o usuário soltar FORA do círculo e estiver no tutorial, volta pra posição inicial.
+            if (tutorialMode) {
+                setPositions({
+                    'light-mode': isDarkMode ? { x: -70, y: 0 } : { x: 0, y: 0 },
+                    'dark-mode': isDarkMode ? { x: 0, y: 0 } : { x: -70, y: 0 }
+                });
+            } else {
+                // Comportamento normal: O ícone fica onde o usuário soltou.
+                setPositions(prev => ({
+                    ...prev,
+                    [active.id]: { x: currentX, y: currentY }
+                }));
+            }
         }
     }
 
+    // MUDANÇA AQUI: Removido o 'scale-150' para arrumar a física do mouse
+    const positionClasses = tutorialMode
+        ? "top-[50vh] right-[50vw] translate-x-[calc(50%+35px)] -translate-y-1/2"
+        : "top-8 right-8 translate-x-0 translate-y-0";
+
     return (
-        <div className="fixed top-8 right-8 z-50 w-12 h-12 pointer-events-auto">
+        <div className={`fixed z-[60] w-12 h-12 pointer-events-auto transition-all duration-1000 ease-in-out ${positionClasses}`}>
             <DndContext onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
                 <CirculoReceptor isHovered={isHovered} innerRef={circleRef} />
-                <ÍconeMagico
-                    id="light-mode"
-                    type="sun"
-                    position={positions['light-mode']}
-                />
-                <ÍconeMagico
-                    id="dark-mode"
-                    type="moon"
-                    position={positions['dark-mode']}
-                />
+                <IconeMagico id="light-mode" type="sun" position={positions['light-mode']} />
+                <IconeMagico id="dark-mode" type="moon" position={positions['dark-mode']} />
             </DndContext>
         </div>
     );
