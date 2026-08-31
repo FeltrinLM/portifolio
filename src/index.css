@@ -42,3 +42,11 @@ html.page-transition::view-transition-new(root) {
     from { clip-path: circle(0px at 50% 100%); }
     to { clip-path: circle(150% at 50% 100%); }
 }
+html.theme-transition-center::view-transition-new(root) {
+    animation: expand-theme-center 1.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes expand-theme-center {
+    from { clip-path: circle(0px at 50% 50%); }
+    to { clip-path: circle(150% at 50% 50%); }
+}

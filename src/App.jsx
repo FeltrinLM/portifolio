@@ -35,14 +35,11 @@ function ConteudoDasPaginas({ language }) {
 }
 
 export default function App() {
-    // TODO: REMOVER ANTES DO MERGE!
-    // Voltar para: const [showTutorial, setShowTutorial] = useState(() => localStorage.getItem('theme_tutorial_done') !== 'true');
-    const [showTutorial, setShowTutorial] = useState(true);
+    // TODO: REMOVER ANTES DO MERGE! (Forçando tutorial)
+    const [tutorialPhase, setTutorialPhase] = useState('theme');
 
-    // TODO: REMOVER ANTES DO MERGE! (Se quiser que guarde a preferência do usuário)
-    // Atualmente forçando o dark mode inicialmente para garantir que o tutorial funcione no F5
+    // TODO: REMOVER ANTES DO MERGE! (Forçando dark mode inicial)
     const [isDarkMode, setIsDarkMode] = useState(true);
-
     const [language, setLanguage] = useState('br');
 
     function handleThemeChange(newTheme) {
@@ -53,10 +50,19 @@ export default function App() {
         setLanguage(newLang);
     }
 
-    function handleTutorialComplete() {
-        setShowTutorial(false);
-        // localStorage.setItem('theme_tutorial_done', 'true'); // Opcional: pode deixar comentado por enquanto
+    function handleNextPhase(nextPhase) {
+        setTutorialPhase(nextPhase);
+        if (nextPhase === 'done') {
+            localStorage.setItem('tutorial_done', 'true');
+        }
     }
+
+    const phaseOrder = ['theme', 'empty_after_theme', 'language', 'empty_after_language', 'navbar', 'done'];
+    const currentIndex = phaseOrder.indexOf(tutorialPhase);
+
+    const showThemeToggle = currentIndex >= phaseOrder.indexOf('theme');
+    const showLanguageToggle = currentIndex >= phaseOrder.indexOf('language');
+    const showNavbar = currentIndex >= phaseOrder.indexOf('navbar');
 
     return (
         <BrowserRouter>
@@ -64,30 +70,41 @@ export default function App() {
 
             <div className={`relative min-h-screen overflow-x-hidden font-serif transition-colors duration-500 ${isDarkMode ? 'dark bg-[#272516]' : 'bg-[#D0C697]'}`}>
 
-                {showTutorial && (
+                {tutorialPhase !== 'done' && (
                     <Tutorial
                         isDarkMode={isDarkMode}
-                        onTutorialComplete={handleTutorialComplete}
+                        tutorialPhase={tutorialPhase}
+                        onNextPhase={handleNextPhase}
+                        language={language}
                     />
                 )}
 
-                <div className={`transition-opacity duration-1000 ${showTutorial ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                <div className={`transition-opacity duration-1000 ${tutorialPhase !== 'done' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                     <ConteudoDasPaginas language={language} />
                     <ResumeCard language={language} />
                 </div>
 
                 <div className="absolute inset-0 pointer-events-none z-50">
-                    <ThemeToggle
-                        isDarkMode={isDarkMode}
-                        onThemeChange={handleThemeChange}
-                        tutorialMode={showTutorial}
-                    />
 
-                    <div className={`transition-opacity duration-1000 ${showTutorial ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}>
+                    <div className={`transition-opacity duration-1000 ${showThemeToggle ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+                        <ThemeToggle
+                            isDarkMode={isDarkMode}
+                            onThemeChange={handleThemeChange}
+                            tutorialMode={tutorialPhase === 'theme'}
+                        />
+                    </div>
+
+                    <div className={`transition-opacity duration-1000 ${showLanguageToggle ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+                        {/* MUDANÇA: Passando as props onTutorialComplete e tutorialMode pra Moeda */}
                         <LanguageToggle
                             language={language}
                             onLanguageChange={handleLanguageChange}
+                            tutorialMode={tutorialPhase === 'language'}
+                            onTutorialComplete={() => handleNextPhase('empty_after_language')}
                         />
+                    </div>
+
+                    <div className={`transition-opacity duration-1000 ${showNavbar ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
                         <Navbar language={language} />
                     </div>
                 </div>
