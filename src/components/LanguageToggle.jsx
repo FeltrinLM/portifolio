@@ -98,6 +98,7 @@ function MoedaMagica({ id, position, language, onToggle }) {
         }, 900);
     }
 
+    // MUDANÇA: A propriedade 'transition' inteira foi removida. O arraste volta a ser perfeitamente livre de lags.
     const wrapperStyle = {
         position: 'absolute',
         top: '0',
@@ -105,7 +106,6 @@ function MoedaMagica({ id, position, language, onToggle }) {
         width: '56px',
         height: '56px',
         transform: `translate3d(${currentX}px, ${currentY}px, 0)`,
-        transition: isDragging ? 'none' : 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
         zIndex: isDragging ? 50 : 10,
         perspective: '1200px'
     };
@@ -174,15 +174,14 @@ export function LanguageToggle({ language, onLanguageChange, tutorialMode = fals
     const [hasClicked, setHasClicked] = useState(false);
 
     useEffect(() => {
+        // Coloca a moeda no centro apenas quando o tutorial começa
         if (tutorialMode) {
             setPosition({
                 x: window.innerWidth / 2 - 32 - 28,
                 y: window.innerHeight / 2 - 32 - 28
             });
-        } else {
-            // Posiciona no canto padrão quando não for tutorial
-            setPosition({ x: 0, y: 0 });
         }
+        // Ocultado o 'else' que forçava a moeda para o canto. Ela fica onde estiver.
     }, [tutorialMode]);
 
     const sensors = useSensors(
@@ -195,18 +194,20 @@ export function LanguageToggle({ language, onLanguageChange, tutorialMode = fals
         let finalX = position.x + delta.x;
         let finalY = position.y + delta.y;
 
-        // Limita a área da tela, garantindo a liberdade da moeda de ficar onde o usuário soltar
+        // Limita a área para que a moeda não saia da tela
         finalX = Math.max(-10, Math.min(window.innerWidth - 70, finalX));
         finalY = Math.max(-10, Math.min(window.innerHeight - 70, finalY));
 
         if (tutorialMode) {
             const distanceToDropzone = Math.hypot(finalX, finalY);
             if (hasClicked && distanceToDropzone < 80) {
-                // Se ele acertou a Dropzone, puxa pro zero e termina o tutorial
+                // Se acertou a zona tracejada, ela vai para a posição inicial (0,0) e completa o tutorial
                 finalX = 0;
                 finalY = 0;
                 if (onTutorialComplete) onTutorialComplete();
             }
+            // MUDANÇA: O 'else' do elástico foi completamente apagado.
+            // Se o usuário não acertar o alvo, a moeda simplesmente fica nas coordenadas em que ele soltou!
         }
 
         setPosition({ x: finalX, y: finalY });
@@ -216,7 +217,6 @@ export function LanguageToggle({ language, onLanguageChange, tutorialMode = fals
         setHasClicked(true);
         onLanguageChange(language === 'br' ? 'en' : 'br');
 
-        // Proteção: Se ele arrastou pro buraco tracejado ANTES de clicar, a gente completa o tutorial logo após o clique!
         if (tutorialMode) {
             const distanceToDropzone = Math.hypot(position.x, position.y);
             if (distanceToDropzone < 80) {
@@ -232,8 +232,8 @@ export function LanguageToggle({ language, onLanguageChange, tutorialMode = fals
                 className={`absolute inset-0 rounded-full border-[3px] transition-all duration-500 ${
                     tutorialMode
                         ? (hasClicked
-                            ? 'border-dashed border-[#4F2B33] animate-pulse scale-125'
-                            : 'border-dashed border-[#4F2B33]/30 scale-110')
+                            ? 'border-dashed border-[#4F2B33] dark:border-[#91B09A] animate-pulse scale-125'
+                            : 'border-dashed border-[#4F2B33]/30 dark:border-[#91B09A]/30 scale-110')
                         : 'opacity-0 scale-50'
                 }`}
             />

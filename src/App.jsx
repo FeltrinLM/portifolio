@@ -35,10 +35,8 @@ function ConteudoDasPaginas({ language }) {
 }
 
 export default function App() {
-    // TODO: REMOVER ANTES DO MERGE! (Forçando tutorial)
-    const [tutorialPhase, setTutorialPhase] = useState('theme');
-
-    // TODO: REMOVER ANTES DO MERGE! (Forçando dark mode inicial)
+    // Checa o localStorage na inicialização. Se já completou, vai direto pro site.
+    const [tutorialPhase, setTutorialPhase] = useState(() => localStorage.getItem('tutorial_done') ? 'done' : 'theme');
     const [isDarkMode, setIsDarkMode] = useState(true);
     const [language, setLanguage] = useState('br');
 
@@ -95,7 +93,6 @@ export default function App() {
                     </div>
 
                     <div className={`transition-opacity duration-1000 ${showLanguageToggle ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-                        {/* MUDANÇA: Passando as props onTutorialComplete e tutorialMode pra Moeda */}
                         <LanguageToggle
                             language={language}
                             onLanguageChange={handleLanguageChange}
@@ -105,7 +102,11 @@ export default function App() {
                     </div>
 
                     <div className={`transition-opacity duration-1000 ${showNavbar ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-                        <Navbar language={language} />
+                        <Navbar
+                            language={language}
+                            tutorialMode={tutorialPhase === 'navbar'}
+                            onTutorialComplete={() => handleNextPhase('done')}
+                        />
                     </div>
                 </div>
             </div>
