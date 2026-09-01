@@ -117,7 +117,7 @@ function FragmentoDeMenu({ id, label, baseAngle, isActive, circleRotation, isSna
     );
 }
 
-export function Navbar({ language = 'br' }) {
+export function Navbar({ language = 'br', tutorialMode = false, onTutorialComplete }) {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -158,17 +158,35 @@ export function Navbar({ language = 'br' }) {
 
     function handleDragEnd(event) {
         if (isSnapping) {
-            const novaRota = event.active.id;
-            if (document.startViewTransition && novaRota !== location.pathname) {
-                document.documentElement.classList.add('page-transition');
-                const transition = document.startViewTransition(() => {
-                    flushSync(() => navigate(novaRota));
-                });
-                transition.finished.finally(() => {
-                    document.documentElement.classList.remove('page-transition');
-                });
-            } else if (novaRota !== location.pathname) {
-                navigate(novaRota);
+            if (tutorialMode) {
+                // MUDANÇA: Disparando a transição de página ao finalizar o tutorial
+                if (document.startViewTransition) {
+                    document.documentElement.classList.add('page-transition');
+                    const transition = document.startViewTransition(() => {
+                        flushSync(() => {
+                            if (onTutorialComplete) onTutorialComplete();
+                        });
+                    });
+                    transition.finished.finally(() => {
+                        document.documentElement.classList.remove('page-transition');
+                    });
+                } else {
+                    if (onTutorialComplete) onTutorialComplete();
+                }
+            } else {
+                // Comportamento normal de roteamento
+                const novaRota = event.active.id;
+                if (document.startViewTransition && novaRota !== location.pathname) {
+                    document.documentElement.classList.add('page-transition');
+                    const transition = document.startViewTransition(() => {
+                        flushSync(() => navigate(novaRota));
+                    });
+                    transition.finished.finally(() => {
+                        document.documentElement.classList.remove('page-transition');
+                    });
+                } else if (novaRota !== location.pathname) {
+                    navigate(novaRota);
+                }
             }
         }
         setCircleRotation(0);
@@ -219,7 +237,7 @@ export function Navbar({ language = 'br' }) {
                             }}
                         />
 
-                        <g fill="currentColor" style={{ transition: 'all 0.3s' }}>
+                        <g fill="currentColor" style={{ transition: 'all 0.3s' }} className={tutorialMode && !isSnapping ? 'animate-pulse' : ''}>
                             <polygon
                                 points="-4,0 0,-4 4,0 0,4"
                                 transform={`translate(${startGap.x}, ${startGap.y}) rotate(${currentGap})`}
@@ -231,17 +249,30 @@ export function Navbar({ language = 'br' }) {
                         </g>
                     </svg>
 
-                    {PIECES.map((piece, index) => (
-                        <FragmentoDeMenu
-                            key={piece.id}
-                            id={piece.id}
-                            label={piece.label[language]}
-                            baseAngle={getTargetAngle(index, activeIndex)}
-                            isActive={location.pathname === piece.id}
-                            circleRotation={circleRotation}
-                            isSnapping={isSnapping}
-                        />
-                    ))}
+                    {PIECES.map((piece, index) => {
+                        const isActive = location.pathname === piece.id;
+
+                        // NOVA LÓGICA AQUI: Oculta a opção central se for o tutorial
+                        if (tutorialMode && isActive) {
+                            return null;
+                        }
+
+                        const labelText = tutorialMode
+                            ? (language === 'en' ? 'Continue' : 'Continuar')
+                            : piece.label[language];
+
+                        return (
+                            <FragmentoDeMenu
+                                key={piece.id}
+                                id={piece.id}
+                                label={labelText}
+                                baseAngle={getTargetAngle(index, activeIndex)}
+                                isActive={isActive}
+                                circleRotation={circleRotation}
+                                isSnapping={isSnapping}
+                            />
+                        );
+                    })}
                 </DndContext>
             </div>
         </nav>
