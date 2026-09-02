@@ -1,3 +1,4 @@
+import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
 import { Text } from '../components/Text';
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ";
@@ -5,6 +6,11 @@ const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ �
 const RUNES_REPEAT = RUNES.repeat(8);
 
 export function Contact({ language = 'br' }) {
+    // 2. Hook de detecção
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
+    // Coloquei a array de contatos solta no topo, assim tanto a versão
+    // Desktop quanto a Mobile podem usá-la sem duplicar código.
     const contactLinks = [
         {
             name: 'E-mail',
@@ -39,6 +45,37 @@ export function Contact({ language = 'br' }) {
         }
     ];
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (SEU ESPAÇO EM BRANCO)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        return (
+            <div className="w-full flex flex-col pt-10 px-4">
+                <Text variant="title" as="h1" className="text-3xl font-bold text-[#4F2B33] dark:text-[#D0C697] text-center">
+                    {language === 'en' ? 'Contact (Mobile)' : 'Contato (Versão Celular)'}
+                </Text>
+
+                <Text variant="text" as="p" className="text-[#4F2B33] dark:text-[#91B09A] mt-4 text-center">
+                    Espaço reservado. Mais tarde, podemos transformar as cartas de tarô em uma lista
+                    simples e elegante na vertical.
+                </Text>
+
+                {/* Exemplo de uso da array para mobile - só para você ver que funciona */}
+                <div className="mt-8 flex flex-col gap-4">
+                    {contactLinks.map((link, index) => (
+                        <a key={index} href={link.url} className="flex items-center gap-4 p-4 border border-[#4F2B33]/30 dark:border-[#91B09A]/30 rounded-xl">
+                            <div className="text-[#4F2B33] dark:text-[#91B09A]">{link.icon}</div>
+                            <span className="text-[#4F2B33] dark:text-[#D0C697] font-bold">{link.name}</span>
+                        </a>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <div className="relative min-h-screen flex flex-col items-center justify-start px-6 pb-[360px] pt-4 w-full overflow-hidden">
 
@@ -76,7 +113,6 @@ export function Contact({ language = 'br' }) {
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    // Sombras mantidas suaves como na correção anterior
                                     className="relative flex flex-col items-center justify-center py-10 px-4 w-48 h-72 md:w-56 md:h-80 rounded-2xl md:rounded-3xl border border-[#4F2B33]/30 dark:border-[#91B09A]/30 bg-gradient-to-br from-[#4F2B33]/[0.05] to-transparent dark:from-[#91B09A]/[0.05] dark:to-transparent backdrop-blur-xl shadow-[0_8px_30px_rgba(79,43,51,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] transition-all duration-300 ease-out group-hover:-translate-y-12 md:group-hover:-translate-y-16 group-hover:shadow-[0_20px_40px_-10px_rgba(79,43,51,0.12)] dark:group-hover:shadow-[0_20px_40px_-10px_rgba(145,176,154,0.1)] overflow-hidden"
                                 >
                                     {/* --- BORDAS ESTILO TARÔ E RUNAS (Desktop) --- */}
@@ -96,7 +132,7 @@ export function Contact({ language = 'br' }) {
                                         </text>
                                     </svg>
 
-                                    {/* --- BORDAS ESTILO TARÔ E RUNAS (Mobile) --- */}
+                                    {/* --- BORDAS ESTILO TARÔ E RUNAS (Mobile - Mantido para manter código puro) --- */}
                                     <svg viewBox="0 0 192 288" className="absolute inset-0 w-full h-full md:hidden text-[#4F2B33]/50 dark:text-[#91B09A]/40 pointer-events-none">
                                         <rect x="8" y="8" width="176" height="272" rx="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
                                         <rect x="24" y="24" width="144" height="240" rx="6" fill="none" stroke="currentColor" strokeWidth="1" />
@@ -128,7 +164,6 @@ export function Contact({ language = 'br' }) {
                                             </Text>
                                         </div>
                                     </div>
-
                                 </a>
                             </div>
                         );

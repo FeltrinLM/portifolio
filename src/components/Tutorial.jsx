@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
+import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
 
 export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
+    // 2. Detecta se é mobile
+    const isMobile = useMediaQuery({ maxWidth: 768 });
     const initialLanguage = useRef(language);
 
     useEffect(() => {
@@ -32,8 +35,13 @@ export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
 
     if (tutorialPhase === 'done') return null;
 
-    const topTextBr = "Para progredir, basta clicar pelo menos uma vez na moeda e arrastá-la para o espaço destacado.";
-    const topTextEn = "To progress, simply click the coin at least once and drag it to the highlighted space.";
+    // --- TEXTOS DO DESKTOP (Drag & Drop) ---
+    const topTextBrDesktop = "Para progredir, basta clicar pelo menos uma vez na moeda e arrastá-la para o espaço destacado.";
+    const topTextEnDesktop = "To progress, simply click the coin at least once and drag it to the highlighted space.";
+
+    // --- TEXTOS DO MOBILE (Click simples) ---
+    const topTextBrMobile = "Para progredir, basta clicar na moeda e escolher o seu idioma.";
+    const topTextEnMobile = "To progress, simply click the coin and choose your language.";
 
     const bottomTextBr = "Não entendeu alguma coisa? É só clicar na moeda.";
     const bottomTextEn = "Didn't understand something? Just click the coin.";
@@ -44,15 +52,21 @@ export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
             {/* Ato 1 (Tema) */}
             <div className={`absolute bottom-[calc(50vh+80px)] left-1/2 -translate-x-1/2 w-full max-w-lg text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'theme' ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-2xl md:text-3xl text-[#4F2B33] dark:text-[#D0C697] font-serif tracking-wide leading-relaxed">
-                    Está escuro, não é? <br /><br />
-                    Talvez se você pegar aquele sol e arrastar para onde a lua está, dê uma clareada.
+                    {isMobile ? (
+                        <>Está escuro, não é? <br /><br /> Clique naquele sol no meio da tela para clarear as coisas.</>
+                    ) : (
+                        <>Está escuro, não é? <br /><br /> Talvez se você pegar aquele sol e arrastar para onde a lua está, dê uma clareada.</>
+                    )}
                 </h2>
             </div>
 
             {/* Ato 2 (Idioma) */}
             <div className={`absolute bottom-[calc(50vh+80px)] left-1/2 -translate-x-1/2 w-full max-w-2xl text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'language' ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-2xl md:text-3xl text-[#4F2B33] dark:text-[#D0C697] font-serif tracking-wide leading-relaxed transition-all duration-500">
-                    {language === 'br' ? topTextBr : topTextEn}
+                    {language === 'br'
+                        ? (isMobile ? topTextBrMobile : topTextBrDesktop)
+                        : (isMobile ? topTextEnMobile : topTextEnDesktop)
+                    }
                 </h2>
             </div>
             <div className={`absolute top-[calc(50vh+80px)] left-1/2 -translate-x-1/2 w-full max-w-lg text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'language' ? 'opacity-100' : 'opacity-0'}`}>
@@ -65,8 +79,14 @@ export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
             <div className={`absolute bottom-[calc(50vh+120px)] left-1/2 -translate-x-1/2 w-full max-w-lg text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'navbar' ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-2xl md:text-3xl text-[#4F2B33] dark:text-[#D0C697] font-serif tracking-wide leading-relaxed">
                     {language === 'br'
-                        ? <>E pra finalizar, basta pegar uma dessas opções e arrastá-la para o círculo.<br/><br/>Bem-vindo ao meu portfólio!</>
-                        : <>And finally, just grab one of these options and drag it to the circle.<br/><br/>Welcome to my portfolio!</>
+                        ? (isMobile
+                                ? <>E pra finalizar, basta clicar no botão abaixo.<br/><br/>Bem-vindo ao meu portfólio!</>
+                                : <>E pra finalizar, basta pegar uma dessas opções e arrastá-la para o círculo.<br/><br/>Bem-vindo ao meu portfólio!</>
+                        )
+                        : (isMobile
+                                ? <>And finally, just click the button below.<br/><br/>Welcome to my portfolio!</>
+                                : <>And finally, just grab one of these options and drag it to the circle.<br/><br/>Welcome to my portfolio!</>
+                        )
                     }
                 </h2>
             </div>

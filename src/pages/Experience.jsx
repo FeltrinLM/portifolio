@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
 import { Text } from '../components/Text';
 
 const LocationIcon = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
@@ -32,6 +33,11 @@ const cardVariants = {
 };
 
 export function Experience({ language = 'br' }) {
+    // 2. Hook de detecção
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
+    // Os estados de navegação de cards 3D permanecem, pois
+    // os hooks precisam ser chamados no mesmo nível sempre
     const [activeIndex, setActiveIndex] = useState(0);
     const isScrolling = useRef(false);
 
@@ -52,6 +58,39 @@ export function Experience({ language = 'br' }) {
         return () => window.removeEventListener('wheel', handleWheel);
     }, [activeIndex]);
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (SEU ESPAÇO EM BRANCO)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        return (
+            <div className="w-full flex flex-col pt-10 px-4">
+                <Text variant="title" as="h1" className="text-3xl font-bold text-[#4F2B33] dark:text-[#D0C697] text-center">
+                    {language === 'en' ? 'My Experience (Mobile)' : 'Minha Experiência (Versão Celular)'}
+                </Text>
+
+                <Text variant="text" as="p" className="text-[#4F2B33] dark:text-[#91B09A] mt-4 text-center">
+                    Espaço reservado. Aqui você pode apenas mapear a array `experiences` e empilhá-las
+                    visualmente, sem a complicação das lógicas de rodinha do mouse ou cartas flutuantes!
+                </Text>
+
+                {/* Exemplo básico: renderizar a array como uma lista simples */}
+                <div className="mt-8 flex flex-col gap-6">
+                    {experiences.map((exp, i) => (
+                        <div key={i} className="p-4 border border-[#4F2B33]/30 dark:border-[#91B09A]/30 rounded-xl">
+                            <Text variant="title" as="h2" className="text-xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
+                                {language === 'en' ? exp.roleEn : exp.roleBr}
+                            </Text>
+                            <span className="text-sm font-bold opacity-80">{exp.company}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <div className="fixed inset-0 pt-8 md:pt-12 pb-6 px-6 bg-[#D0C697] dark:bg-[#272516] overflow-hidden flex flex-col items-center justify-start">
             <div className="absolute z-0 w-[600px] h-[600px] top-10 -right-20 bg-[#4F2B33]/5 dark:bg-[#91B09A]/5 blur-[120px] rounded-full pointer-events-none" />

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
 import { Text } from '../components/Text';
 
 const SparkleIcon = () => (
@@ -64,6 +65,48 @@ const cardVariants = {
 };
 
 export function Projects({ language = 'br' }) {
+    // 2. Hook de detecção
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (SEU ESPAÇO EM BRANCO)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        return (
+            <div className="w-full flex flex-col pt-10 px-4">
+                <Text variant="title" as="h1" className="text-3xl font-bold text-[#4F2B33] dark:text-[#D0C697] text-center">
+                    {language === 'en' ? 'Projects (Mobile)' : 'Projetos (Versão Celular)'}
+                </Text>
+
+                <Text variant="text" as="p" className="text-[#4F2B33] dark:text-[#91B09A] mt-4 text-center">
+                    Espaço reservado. Assim como na experiência, você poderá exibir os cards
+                    empilhados com scroll natural ou até um carrossel "swipe" horizontal!
+                </Text>
+
+                <div className="mt-8 flex flex-col gap-6">
+                    {projects.map((project, index) => (
+                        <div key={index} className="p-4 border border-[#4F2B33]/30 dark:border-[#91B09A]/30 rounded-xl relative">
+                            {project.featured && (
+                                <span className="absolute -top-3 left-4 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] px-3 py-1 rounded-full text-[10px] font-bold">
+                                    Destaque
+                                </span>
+                            )}
+                            <Text variant="title" as="h2" className="text-xl font-bold text-[#4F2B33] dark:text-[#D0C697] mt-2">
+                                {project.title}
+                            </Text>
+                            <span className="text-sm font-bold opacity-80">
+                                {language === 'en' ? project.subtitleEn : project.subtitleBr}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <div className="min-h-screen pt-4 pb-[600px] px-6 bg-[#D0C697] dark:bg-[#272516] flex flex-col items-center">
 

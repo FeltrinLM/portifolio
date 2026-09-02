@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
 import { Text } from './Text';
 
 export function ResumeCard({ language = 'br', className = '' }) {
+    // 2. Hook de detecção
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
     const url = language === 'en' ? '/cv/cv_lorenzo_en.pdf' : '/cv/cv_lorenzo_br.pdf';
 
     const [showBubble, setShowBubble] = useState(false);
@@ -29,6 +33,51 @@ export function ResumeCard({ language = 'br', className = '' }) {
         return () => clearInterval(interval);
     }, [messages.length]);
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        return (
+            <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                // No mobile, removemos os efeitos de hover complexos e colocamos ele no topo
+                // para não conflitar com a Bottom Navbar que criamos.
+                className={`fixed right-4 top-[80px] z-[40] w-14 h-24 flex items-end justify-center active:scale-95 transition-transform duration-200 cursor-pointer ${className}`}
+            >
+                {/* --- BALÃO DE FALA (Mobile) --- */}
+                {/* Posicionado ao lado esquerdo da carta para não sair da tela */}
+                <div
+                    className={`absolute top-2 right-[120%] whitespace-nowrap px-3 py-1.5 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] text-[10px] font-bold rounded-lg shadow-lg transition-all duration-300 z-30 
+                    ${showBubble ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'}`}
+                >
+                    {messages[messageIndex]}
+                    <div className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 bg-[#4F2B33] dark:bg-[#91B09A] rotate-45"></div>
+                </div>
+
+                {/* --- A CARTA (Mobile) --- */}
+                <div
+                    className="relative w-12 h-20 md:w-16 md:h-28 z-20 mb-2 shadow-lg border border-[#D0C697]/20 dark:border-[#3B381E]/20 bg-[#4F2B33] dark:bg-[#91B09A] rounded-md flex flex-col items-center justify-center gap-1 overflow-hidden"
+                >
+                    <div className="text-[#D0C697] dark:text-[#3B381E]">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+                            <circle cx="12" cy="9" r="3"/>
+                            <path d="M7 19c0-3.5 10-3.5 10 0"/>
+                        </svg>
+                    </div>
+                    <Text variant="title" as="span" className="text-[9px] font-bold text-[#D0C697] dark:text-[#3B381E] tracking-widest uppercase">
+                        CV
+                    </Text>
+                </div>
+            </a>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <a
             href={url}

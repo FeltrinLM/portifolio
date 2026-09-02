@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
 import { Text } from '../components/Text';
 // import { BackgroundCarousel } from '../components/BackgroundCarousel';
 import fotoPerfil from '../assets/good_looking.jpeg';
@@ -7,6 +8,12 @@ const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ �
 const DOUBLE_RUNES = RUNES + " " + RUNES;
 
 export function About({ language = 'br' }) {
+    // 2. Detecte o mobile logo no início
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
+    // Todos os seus estados e lógicas do desktop continuam exatamente aqui.
+    // Eles vão calcular em background no mobile, mas como não vamos usar
+    // as variáveis no HTML do celular, não causarão nenhum problema visual.
     const [scrollY, setScrollY] = useState(0);
     const [maxScroll, setMaxScroll] = useState(500);
     const [animateSkills, setAnimateSkills] = useState(false);
@@ -66,10 +73,7 @@ export function About({ language = 'br' }) {
 
     const renderSkillTag = (skill) => {
         const baseClass = "px-3 py-1.5 rounded-lg text-sm cursor-default transition-all duration-300 hover:scale-105 inline-block";
-
-        // CORREÇÃO: dark:text-[#D0C697] mantido
         const normalClass = "border border-[#4F2B33]/30 dark:border-[#91B09A]/40 text-[#4F2B33] dark:text-[#D0C697] hover:bg-[#4F2B33] hover:text-[#D0C697] dark:hover:bg-[#91B09A] dark:hover:text-[#3B381E]";
-
         const highlightClass = "bg-[#4F2B33] text-[#D0C697] dark:bg-[#91B09A] dark:text-[#3B381E] font-bold shadow-md";
 
         return (
@@ -79,9 +83,34 @@ export function About({ language = 'br' }) {
         );
     };
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (SEU ESPAÇO EM BRANCO)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        return (
+            <div className="w-full flex flex-col pt-10">
+                <Text variant="title" as="h1" className="text-3xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
+                    Página Sobre (Versão Celular)
+                </Text>
+                <Text variant="text" as="p" className="text-[#4F2B33] dark:text-[#91B09A] mt-4">
+                    Este é o seu quadro em branco. Aqui você pode montar as divs, fotos e
+                    textos de forma estática ou com animações simples, sem se preocupar
+                    com os absolutes, opacidades ou scroll paralax do Desktop!
+                </Text>
+
+                {/* Exemplo: você pode reutilizar as listas daqui de cima sem quebrar o desktop */}
+                <div className="mt-8 flex flex-wrap gap-2">
+                    {languagesList.map(renderSkillTag)}
+                </div>
+            </div>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <div className="relative w-full h-[170vh]">
-
             {/* --- SEÇÃO 1: HERO --- */}
             <div
                 className="fixed inset-0 w-full flex flex-col items-center justify-start pt-[12vh] pointer-events-none"
@@ -143,11 +172,8 @@ export function About({ language = 'br' }) {
                 }}
             >
                 <div className="relative z-20 w-full max-w-6xl mx-auto pointer-events-auto">
-
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-16">
-
                         <div className="lg:col-span-7 flex flex-col gap-8">
-
                             <div className="flex flex-col gap-2">
                                 <Text variant="title" as="h2" className="text-4xl md:text-5xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                                     {language === 'en' ? 'Who I am.' : 'Quem eu sou.'}
@@ -155,7 +181,6 @@ export function About({ language = 'br' }) {
                             </div>
 
                             <div className="flex flex-col gap-6 text-[#4F2B33]/90 dark:text-[#D0C697]/90 text-lg leading-relaxed font-medium">
-                                {/* CORREÇÃO: Tags strong com dark:text-[#D0C697] */}
                                 <Text variant="text" as="p">
                                     {language === 'en'
                                         ? <>I consider <strong className="text-[#4F2B33] dark:text-[#D0C697] font-bold">Dr. House</strong> one of the best-written characters in TV history. My favorite episodes are... Wait, you're not here to read about that, right? Let's talk about what matters: I am an <strong className="text-[#4F2B33] dark:text-[#D0C697] font-bold">Internet Systems</strong> student at UFSM. If you haven't heard of it, you should. It's the most software-development-focused degree at the institution, and it's exactly where I fell in love with this world.</>
@@ -188,7 +213,6 @@ export function About({ language = 'br' }) {
                                             </svg>
                                         </div>
                                         <div className="flex flex-col">
-                                            {/* CORREÇÃO: Adicionado text-[#4F2B33] dark:text-[#D0C697] nos títulos menores */}
                                             <Text variant="text" className="text-[10px] font-bold tracking-widest opacity-60 uppercase text-[#4F2B33] dark:text-[#D0C697]">{card.label}</Text>
                                             <Text variant="text" className="text-sm font-bold text-[#4F2B33] dark:text-[#D0C697]">{card.value}</Text>
                                         </div>
@@ -199,16 +223,13 @@ export function About({ language = 'br' }) {
 
                         <div className="lg:col-span-5">
                             <div className="w-full h-full p-6 md:p-8 rounded-3xl border border-[#4F2B33]/20 dark:border-[#91B09A]/20 bg-[#4F2B33]/[0.02] dark:bg-[#91B09A]/[0.02] backdrop-blur-md flex flex-col justify-between gap-8 shadow-lg">
-
                                 <div className="flex flex-col gap-8">
                                     <Text variant="title" as="h3" className="text-2xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                                         {language === 'en' ? 'Technical Skills' : 'Habilidades Técnicas'}
                                     </Text>
 
                                     <div className="flex flex-col gap-6">
-
                                         <div className="flex flex-col gap-3">
-                                            {/* CORREÇÃO: Adicionado text-[#4F2B33] dark:text-[#D0C697] nos subtítulos de categoria */}
                                             <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase text-[#4F2B33] dark:text-[#D0C697]">
                                                 {language === 'en' ? 'Languages' : 'Linguagens'}
                                             </Text>
@@ -218,7 +239,6 @@ export function About({ language = 'br' }) {
                                         </div>
 
                                         <div className="flex flex-col gap-3">
-                                            {/* CORREÇÃO: Adicionado text-[#4F2B33] dark:text-[#D0C697] nos subtítulos de categoria */}
                                             <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase text-[#4F2B33] dark:text-[#D0C697]">
                                                 Frameworks
                                             </Text>
@@ -228,7 +248,6 @@ export function About({ language = 'br' }) {
                                         </div>
 
                                         <div className="flex flex-col gap-3">
-                                            {/* CORREÇÃO: Adicionado text-[#4F2B33] dark:text-[#D0C697] nos subtítulos de categoria */}
                                             <Text variant="text" className="text-[11px] font-bold tracking-widest opacity-60 uppercase text-[#4F2B33] dark:text-[#D0C697]">
                                                 {language === 'en' ? 'Tools' : 'Ferramentas'}
                                             </Text>
@@ -246,7 +265,6 @@ export function About({ language = 'br' }) {
                                     </Text>
 
                                     <div className="flex flex-row justify-around mt-2">
-
                                         {/* Português (100%) */}
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="relative flex items-center justify-center w-20 h-20">
@@ -262,7 +280,6 @@ export function About({ language = 'br' }) {
                                                     />
                                                 </svg>
                                                 <div className="absolute inset-0 flex items-center justify-center">
-                                                    {/* CORREÇÃO: Garantindo o dark:text-[#D0C697] */}
                                                     <Text variant="text" className="text-[10px] font-bold text-[#4F2B33] dark:text-[#D0C697] uppercase tracking-widest">
                                                         {language === 'en' ? 'Native' : 'Nativo'}
                                                     </Text>
@@ -288,7 +305,6 @@ export function About({ language = 'br' }) {
                                                     />
                                                 </svg>
                                                 <div className="absolute inset-0 flex items-center justify-center mt-1">
-                                                    {/* CORREÇÃO: Garantindo o dark:text-[#D0C697] */}
                                                     <Text variant="title" className="text-xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                                                         C1
                                                     </Text>
@@ -298,10 +314,8 @@ export function About({ language = 'br' }) {
                                                 {language === 'en' ? 'English' : 'Inglês'}
                                             </Text>
                                         </div>
-
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>

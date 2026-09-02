@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { DndContext, useDraggable } from '@dnd-kit/core';
+import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
 
 const MAGNETIC_RADIUS = 60;
 // Margem de segurança do tutorial. Se arrastar mais que isso, o elástico puxa de volta.
@@ -63,6 +64,9 @@ function CirculoReceptor({ isHovered, innerRef }) {
 }
 
 export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false }) {
+    // 2. Hook de detecção no topo
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
     const [isHovered, setIsHovered] = useState(false);
     const circleRef = useRef(null);
 
@@ -133,6 +137,37 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
         }
     }
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (SIMPLES CLICK EM VEZ DE DRAG)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        return (
+            <button
+                onClick={() => changeThemeWithAnimation(!isDarkMode)}
+                // Se for tutorial, centraliza grande na tela. Se não, é um botão normal no fluxo.
+                className={`flex items-center justify-center w-12 h-12 rounded-full transition-transform active:scale-90 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] shadow-lg ${
+                    tutorialMode ? 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-150 z-50' : 'relative z-50'
+                }`}
+                aria-label="Toggle Theme"
+            >
+                {isDarkMode ? (
+                    // Ícone da Lua
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                ) : (
+                    // Ícone do Sol
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                )}
+            </button>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     const positionClasses = tutorialMode
         ? "top-[50vh] right-[50vw] translate-x-[calc(50%+35px)] -translate-y-1/2"
         : "top-8 right-8 translate-x-0 translate-y-0";

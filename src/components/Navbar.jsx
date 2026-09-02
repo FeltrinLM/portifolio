@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { flushSync } from 'react-dom';
 import { DndContext, useDraggable } from '@dnd-kit/core';
+import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
 
 const CIRCLE_RADIUS = 200;
 const ORBIT_RADIUS = 272;
@@ -10,11 +11,19 @@ const MIN_RADIUS = 176;
 const MAX_RADIUS = 304;
 const SNAP_DISTANCE = 248;
 
+// Ícones minimalistas criados para a Navbar do celular
+const NavIcons = {
+    '/sobre': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+    '/experiencia': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
+    '/projetos': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
+    '/contato': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+};
+
 const PIECES = [
-    { id: '/sobre', label: { br: 'Sobre', en: 'About' }, gap: 14 },
-    { id: '/experiencia', label: { br: 'Experiência', en: 'Experience' }, gap: 28 },
-    { id: '/projetos', label: { br: 'Projetos', en: 'Projects' }, gap: 20 },
-    { id: '/contato', label: { br: 'Contato', en: 'Contact' }, gap: 18 },
+    { id: '/sobre', label: { br: 'Sobre', en: 'About' }, gap: 14, icon: NavIcons['/sobre'] },
+    { id: '/experiencia', label: { br: 'Experiência', en: 'Experience' }, gap: 28, icon: NavIcons['/experiencia'] },
+    { id: '/projetos', label: { br: 'Projetos', en: 'Projects' }, gap: 20, icon: NavIcons['/projetos'] },
+    { id: '/contato', label: { br: 'Contato', en: 'Contact' }, gap: 18, icon: NavIcons['/contato'] },
 ];
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
@@ -118,6 +127,9 @@ function FragmentoDeMenu({ id, label, baseAngle, isActive, circleRotation, isSna
 }
 
 export function Navbar({ language = 'br', tutorialMode = false, onTutorialComplete }) {
+    // 2. Hook de detecção no topo
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -194,6 +206,70 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
         setDragId(null);
     }
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (BOTTOM NAVIGATION BAR)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        // Se estiver no tutorial, exibe apenas um botão grande para continuar
+        if (tutorialMode) {
+            return (
+                <div className="fixed bottom-0 left-0 w-full p-6 z-50 bg-gradient-to-t from-[#D0C697] dark:from-[#272516] to-transparent">
+                    <button
+                        onClick={() => {
+                            if (document.startViewTransition) {
+                                document.documentElement.classList.add('page-transition');
+                                const transition = document.startViewTransition(() => {
+                                    flushSync(() => {
+                                        if (onTutorialComplete) onTutorialComplete();
+                                    });
+                                });
+                                transition.finished.finally(() => {
+                                    document.documentElement.classList.remove('page-transition');
+                                });
+                            } else {
+                                if (onTutorialComplete) onTutorialComplete();
+                            }
+                        }}
+                        className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] shadow-xl active:scale-95 transition-transform"
+                    >
+                        {language === 'en' ? 'Start Journey' : 'Iniciar Jornada'}
+                    </button>
+                </div>
+            );
+        }
+
+        // Navegação normal do Mobile (Barra inferior com ícones)
+        return (
+            <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-sm h-16 rounded-2xl flex items-center justify-around px-2 z-50 bg-[#D0C697]/90 dark:bg-[#272516]/90 backdrop-blur-md border border-[#4F2B33]/20 dark:border-[#91B09A]/20 shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+                {PIECES.map((piece) => {
+                    const isActive = location.pathname === piece.id;
+
+                    return (
+                        <button
+                            key={piece.id}
+                            onClick={() => navigate(piece.id)}
+                            className={`relative flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
+                                isActive
+                                    ? 'text-[#D0C697] dark:text-[#272516] bg-[#4F2B33] dark:bg-[#91B09A] shadow-md -translate-y-2'
+                                    : 'text-[#4F2B33]/70 dark:text-[#91B09A]/70 hover:text-[#4F2B33] dark:hover:text-[#91B09A]'
+                            }`}
+                        >
+                            <div className="scale-90">{piece.icon}</div>
+
+                            {/* Pontinho abaixo do ícone se estiver ativo */}
+                            {isActive && (
+                                <span className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-[#4F2B33] dark:bg-[#91B09A]" />
+                            )}
+                        </button>
+                    );
+                })}
+            </nav>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <nav className="fixed bottom-0 left-0 w-full h-[320px] flex justify-center z-50 pointer-events-none overflow-hidden">
             <div className="relative w-[640px] h-[640px] pointer-events-auto">
@@ -252,7 +328,7 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
                     {PIECES.map((piece, index) => {
                         const isActive = location.pathname === piece.id;
 
-                        // NOVA LÓGICA AQUI: Oculta a opção central se for o tutorial
+                        // Oculta a opção central se for o tutorial
                         if (tutorialMode && isActive) {
                             return null;
                         }
