@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion';
-import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useMediaQuery } from 'react-responsive';
 import { Text } from '../components/Text';
 
 const SparkleIcon = () => (
@@ -65,40 +66,142 @@ const cardVariants = {
 };
 
 export function Projects({ language = 'br' }) {
-    // 2. Hook de detecção
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
+    // Estado para controlar qual card mobile está aberto (LENPA inicia aberto)
+    const [expandedProject, setExpandedProject] = useState('LENPA');
+
     // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (SEU ESPAÇO EM BRANCO)
+    // 3. A INTERCEPTAÇÃO MOBILE (ACCORDION EXPANSÍVEL FULL WIDTH)
     // ----------------------------------------------------------------------
     if (isMobile) {
+        // Reordena a array para forçar o LENPA no topo, e os outros embaixo
+        const mobileProjects = [...projects].sort((a, b) => {
+            if (a.title === 'LENPA') return -1;
+            if (b.title === 'LENPA') return 1;
+            return 0;
+        });
+
         return (
-            <div className="w-full flex flex-col pt-10 px-4">
-                <Text variant="title" as="h1" className="text-3xl font-bold text-[#4F2B33] dark:text-[#D0C697] text-center">
-                    {language === 'en' ? 'Projects (Mobile)' : 'Projetos (Versão Celular)'}
-                </Text>
+            <div className="w-full min-h-screen flex flex-col pt-12 pb-28 px-4 overflow-x-hidden">
 
-                <Text variant="text" as="p" className="text-[#4F2B33] dark:text-[#91B09A] mt-4 text-center">
-                    Espaço reservado. Assim como na experiência, você poderá exibir os cards
-                    empilhados com scroll natural ou até um carrossel "swipe" horizontal!
-                </Text>
+                {/* Cabeçalho */}
+                <div className="relative z-20 flex flex-col items-center gap-1 text-center w-full mb-8 mt-4">
+                    <Text variant="title" as="h1" className="text-4xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
+                        {language === 'en' ? 'My Projects' : 'Meus Projetos'}
+                    </Text>
+                    <div className="flex items-center gap-3 text-[#4F2B33]/80 dark:text-[#91B09A]/90 mt-1">
+                        <div className="w-6 h-px bg-current opacity-40"></div>
+                        <Text variant="text" as="p" className="text-base tracking-widest">
+                            {language === 'en' ? 'Highlights so far' : 'Destaques até Agora'}
+                        </Text>
+                        <div className="w-6 h-px bg-current opacity-40"></div>
+                    </div>
+                </div>
 
-                <div className="mt-8 flex flex-col gap-6">
-                    {projects.map((project, index) => (
-                        <div key={index} className="p-4 border border-[#4F2B33]/30 dark:border-[#91B09A]/30 rounded-xl relative">
-                            {project.featured && (
-                                <span className="absolute -top-3 left-4 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] px-3 py-1 rounded-full text-[10px] font-bold">
-                                    Destaque
-                                </span>
-                            )}
-                            <Text variant="title" as="h2" className="text-xl font-bold text-[#4F2B33] dark:text-[#D0C697] mt-2">
-                                {project.title}
-                            </Text>
-                            <span className="text-sm font-bold opacity-80">
-                                {language === 'en' ? project.subtitleEn : project.subtitleBr}
-                            </span>
-                        </div>
-                    ))}
+                {/* Lista de Projetos (Accordion) */}
+                <div className="flex flex-col gap-4 w-full">
+                    {mobileProjects.map((project, index) => {
+                        const isExpanded = expandedProject === project.title;
+                        const isFeatured = project.featured;
+
+                        return (
+                            <div
+                                key={index}
+                                // O clique expande ou retrai o card
+                                onClick={() => setExpandedProject(isExpanded ? null : project.title)}
+                                className={`w-full rounded-[24px] border transition-all duration-300 ease-in-out relative overflow-hidden flex flex-col p-5 cursor-pointer
+                                    ${isExpanded ? 'shadow-md' : 'shadow-sm hover:bg-[#4F2B33]/[0.04] dark:hover:bg-[#91B09A]/[0.04]'}
+                                    ${isFeatured
+                                    ? 'border-[#4F2B33]/40 dark:border-[#91B09A]/50 bg-[#4F2B33]/[0.06] dark:bg-[#91B09A]/10'
+                                    : 'border-[#4F2B33]/20 dark:border-[#91B09A]/20 bg-[#4F2B33]/[0.02] dark:bg-[#91B09A]/[0.02]'
+                                }`}
+                            >
+                                {/* Selo de Destaque */}
+                                {isFeatured && (
+                                    <div className="absolute top-0 right-0 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] px-3 py-1 rounded-bl-xl text-[9px] uppercase tracking-[0.2em] font-bold shadow-sm">
+                                        {language === 'en' ? 'Magnum Opus' : 'Magnum Opus'}
+                                    </div>
+                                )}
+
+                                {/* Header do Card (Sempre Visível) */}
+                                <div className="flex justify-between items-center w-full mt-1">
+                                    <div className="flex flex-col pr-4">
+                                        <div className="flex items-center gap-2">
+                                            <Text variant="title" as="h2" className="text-2xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
+                                                {project.title}
+                                            </Text>
+                                        </div>
+                                        <Text variant="text" as="p" className="text-[11px] font-bold opacity-70 uppercase tracking-widest mt-1 text-[#4F2B33] dark:text-[#D0C697]">
+                                            {language === 'en' ? project.subtitleEn : project.subtitleBr}
+                                        </Text>
+                                    </div>
+
+                                    {/* Ícone de Seta que vira quando abre */}
+                                    <motion.div
+                                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="shrink-0 text-[#4F2B33] dark:text-[#91B09A]"
+                                    >
+                                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                            <polyline points="6 9 12 15 18 9" />
+                                        </svg>
+                                    </motion.div>
+                                </div>
+
+                                {/* Corpo do Card (Expande Suavemente) */}
+                                <AnimatePresence initial={false}>
+                                    {isExpanded && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="pt-5 pb-1 flex flex-col gap-4 border-t border-[#4F2B33]/10 dark:border-[#91B09A]/10 mt-4">
+
+                                                {/* Descrição */}
+                                                <Text variant="text" as="p" className="text-[13px] text-[#4F2B33]/90 dark:text-[#91B09A]/90 leading-relaxed">
+                                                    {language === 'en' ? project.descriptionEn : project.descriptionBr}
+                                                </Text>
+
+                                                {/* Tags */}
+                                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                                    {project.tags.map((tag, tagIndex) => (
+                                                        <div key={tagIndex} className="px-3 py-1 rounded bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] text-[10px] font-bold tracking-wider uppercase">
+                                                            {tag}
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Links (Se existirem) */}
+                                                {project.links.length > 0 && (
+                                                    <div className="flex flex-wrap gap-2 pt-2 mt-2">
+                                                        {project.links.map((link, linkIndex) => (
+                                                            // O stopPropagation impede que clicar no link feche o card inteiro
+                                                            <a
+                                                                key={linkIndex}
+                                                                href={link.url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] text-[11px] font-bold tracking-wider active:scale-95 transition-transform shadow-sm"
+                                                            >
+                                                                <GitHubIcon />
+                                                                {link.label}
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         );

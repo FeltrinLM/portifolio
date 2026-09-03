@@ -1,16 +1,14 @@
-import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
+import { useMediaQuery } from 'react-responsive';
 import { Text } from '../components/Text';
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ";
-// Repetimos as runas para preencher a borda e permitir a animação contínua
+// Repetimos as runas para preencher a borda e permitir a animação contínua no Desktop
 const RUNES_REPEAT = RUNES.repeat(8);
 
 export function Contact({ language = 'br' }) {
-    // 2. Hook de detecção
+    // Hook de detecção mobile
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
-    // Coloquei a array de contatos solta no topo, assim tanto a versão
-    // Desktop quanto a Mobile podem usá-la sem duplicar código.
     const contactLinks = [
         {
             name: 'E-mail',
@@ -46,26 +44,53 @@ export function Contact({ language = 'br' }) {
     ];
 
     // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (SEU ESPAÇO EM BRANCO)
+    // 3. A INTERCEPTAÇÃO MOBILE (TELA ÚNICA, CARDS ESPAÇOSOS E LIMPOS)
     // ----------------------------------------------------------------------
     if (isMobile) {
         return (
-            <div className="w-full flex flex-col pt-10 px-4">
-                <Text variant="title" as="h1" className="text-3xl font-bold text-[#4F2B33] dark:text-[#D0C697] text-center">
-                    {language === 'en' ? 'Contact (Mobile)' : 'Contato (Versão Celular)'}
-                </Text>
+            <div className="w-full min-h-screen flex flex-col items-center pt-12 pb-24 px-4 overflow-x-hidden">
 
-                <Text variant="text" as="p" className="text-[#4F2B33] dark:text-[#91B09A] mt-4 text-center">
-                    Espaço reservado. Mais tarde, podemos transformar as cartas de tarô em uma lista
-                    simples e elegante na vertical.
-                </Text>
+                {/* Título Mobile */}
+                <div className="relative z-20 flex flex-col items-center gap-1 text-center w-full mb-8 mt-4">
+                    <Text variant="title" as="h1" className="text-4xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
+                        {language === 'en' ? 'Contact' : 'Contato'}
+                    </Text>
+                    <div className="flex items-center gap-3 text-[#4F2B33]/80 dark:text-[#91B09A]/90 mt-1">
+                        <div className="w-6 h-px bg-current opacity-40"></div>
+                        <Text variant="text" as="p" className="text-base tracking-widest">
+                            {language === 'en' ? "So, let's talk?" : 'E aí, vamos conversar?'}
+                        </Text>
+                        <div className="w-6 h-px bg-current opacity-40"></div>
+                    </div>
+                </div>
 
-                {/* Exemplo de uso da array para mobile - só para você ver que funciona */}
-                <div className="mt-8 flex flex-col gap-4">
+                {/* Cards Empilhados Verticalmente (Mais Altos e Espaçosos) */}
+                <div className="flex flex-col gap-6 w-full items-center">
                     {contactLinks.map((link, index) => (
-                        <a key={index} href={link.url} className="flex items-center gap-4 p-4 border border-[#4F2B33]/30 dark:border-[#91B09A]/30 rounded-xl">
-                            <div className="text-[#4F2B33] dark:text-[#91B09A]">{link.icon}</div>
-                            <span className="text-[#4F2B33] dark:text-[#D0C697] font-bold">{link.name}</span>
+                        <a
+                            key={index}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            // Aumentei a altura para 150px, a largura max para 340px e adicionei mais padding (p-5)
+                            className="relative flex flex-col items-center justify-center p-5 w-full max-w-[340px] h-[150px] rounded-[28px] border border-[#4F2B33]/30 dark:border-[#91B09A]/30 bg-gradient-to-br from-[#4F2B33]/[0.05] to-transparent dark:from-[#91B09A]/[0.05] dark:to-transparent backdrop-blur-xl shadow-sm active:scale-[0.98] transition-transform overflow-hidden group"
+                        >
+                            <div className="relative z-10 flex flex-col items-center justify-center gap-3 w-full h-full">
+                                {/* Ícone maior com mais respiro */}
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] transition-colors group-active:bg-[#4F2B33] group-active:text-[#D0C697] dark:group-active:bg-[#91B09A] dark:group-active:text-[#3B381E]">
+                                    <div className="scale-[0.85]">{link.icon}</div>
+                                </div>
+
+                                <div className="flex flex-col items-center text-center w-full">
+                                    {/* Textos ligeiramente maiores e com espaçamentos mais relaxados */}
+                                    <Text variant="title" as="h2" className="text-2xl font-bold text-[#4F2B33] dark:text-[#D0C697] leading-none">
+                                        {link.name}
+                                    </Text>
+                                    <Text variant="text" as="span" className="text-[13px] font-bold text-[#4F2B33]/80 dark:text-[#91B09A]/90 tracking-wider text-center whitespace-nowrap mt-1.5">
+                                        {link.value}
+                                    </Text>
+                                </div>
+                            </div>
                         </a>
                     ))}
                 </div>
@@ -79,7 +104,6 @@ export function Contact({ language = 'br' }) {
     return (
         <div className="relative min-h-screen flex flex-col items-center justify-start px-6 pb-[360px] pt-4 w-full overflow-hidden">
 
-            {/* Blur reduzido em tamanho e intensidade para não tocar as bordas */}
             <div className="absolute top-10 z-0 w-56 h-56 md:w-[400px] md:h-[400px] bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 blur-[80px] rounded-full pointer-events-none"></div>
 
             <div className="relative z-20 flex flex-col items-center gap-2 text-center w-full max-w-6xl mx-auto shrink-0">
@@ -126,23 +150,6 @@ export function Contact({ language = 'br' }) {
                                         </text>
                                         <text fill="currentColor" fontSize="8" letterSpacing="4" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                                             <textPath href={`#desktop-path-${index}`} startOffset="0%">
-                                                {RUNES_REPEAT}
-                                                <animate attributeName="startOffset" from="0%" to="-100%" dur="20s" repeatCount="indefinite" />
-                                            </textPath>
-                                        </text>
-                                    </svg>
-
-                                    {/* --- BORDAS ESTILO TARÔ E RUNAS (Mobile - Mantido para manter código puro) --- */}
-                                    <svg viewBox="0 0 192 288" className="absolute inset-0 w-full h-full md:hidden text-[#4F2B33]/50 dark:text-[#91B09A]/40 pointer-events-none">
-                                        <rect x="8" y="8" width="176" height="272" rx="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                                        <rect x="24" y="24" width="144" height="240" rx="6" fill="none" stroke="currentColor" strokeWidth="1" />
-                                        <path id={`mobile-path-${index}`} d="M 20,28 A 8,8 0 0 1 28,20 H 164 A 8,8 0 0 1 172,28 V 260 A 8,8 0 0 1 164,268 H 28 A 8,8 0 0 1 20,260 Z" fill="none" />
-
-                                        <text fill="currentColor" fontSize="7" letterSpacing="3" className="opacity-100 group-hover:opacity-0 transition-opacity duration-500">
-                                            <textPath href={`#mobile-path-${index}`} startOffset="0%">{RUNES_REPEAT}</textPath>
-                                        </text>
-                                        <text fill="currentColor" fontSize="7" letterSpacing="3" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                            <textPath href={`#mobile-path-${index}`} startOffset="0%">
                                                 {RUNES_REPEAT}
                                                 <animate attributeName="startOffset" from="0%" to="-100%" dur="20s" repeatCount="indefinite" />
                                             </textPath>

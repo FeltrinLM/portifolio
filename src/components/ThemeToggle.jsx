@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { DndContext, useDraggable } from '@dnd-kit/core';
-import { useMediaQuery } from 'react-responsive'; // <-- 1. Importe o hook
+import { useMediaQuery } from 'react-responsive';
 
 const MAGNETIC_RADIUS = 60;
 // Margem de segurança do tutorial. Se arrastar mais que isso, o elástico puxa de volta.
@@ -138,29 +138,41 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
     }
 
     // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (SIMPLES CLICK EM VEZ DE DRAG)
+    // 3. A INTERCEPTAÇÃO MOBILE (SWITCH ESTILO iOS)
     // ----------------------------------------------------------------------
     if (isMobile) {
         return (
             <button
                 onClick={() => changeThemeWithAnimation(!isDarkMode)}
-                // Se for tutorial, centraliza grande na tela. Se não, é um botão normal no fluxo.
-                className={`flex items-center justify-center w-12 h-12 rounded-full transition-transform active:scale-90 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] shadow-lg ${
-                    tutorialMode ? 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-150 z-50' : 'relative z-50'
+                className={`flex items-center p-1 rounded-full transition-all duration-500 shadow-inner z-50 ${
+                    isDarkMode ? 'bg-[#4F2B33]/20' : 'bg-[#D0C697]/50'
+                } ${
+                    tutorialMode
+                        ? 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-14 scale-125'
+                        : 'fixed top-6 right-4 w-[72px] h-[36px]'
                 }`}
                 aria-label="Toggle Theme"
             >
-                {isDarkMode ? (
-                    // Ícone da Lua
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                ) : (
-                    // Ícone do Sol
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                )}
+                {/* O "Círculo" que desliza */}
+                <div
+                    className={`flex items-center justify-center rounded-full bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] shadow-md transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                        tutorialMode
+                            ? `w-12 h-12 ${isDarkMode ? 'translate-x-[72px]' : 'translate-x-0'}`
+                            : `w-[28px] h-[28px] ${isDarkMode ? 'translate-x-[36px]' : 'translate-x-0'}`
+                    }`}
+                >
+                    {isDarkMode ? (
+                        // Ícone da Lua
+                        <svg viewBox="0 0 24 24" width={tutorialMode ? "24" : "16"} height={tutorialMode ? "24" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    ) : (
+                        // Ícone do Sol
+                        <svg viewBox="0 0 24 24" width={tutorialMode ? "24" : "16"} height={tutorialMode ? "24" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    )}
+                </div>
             </button>
         );
     }
