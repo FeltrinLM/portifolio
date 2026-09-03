@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { flushSync } from 'react-dom';
 import { DndContext, useDraggable } from '@dnd-kit/core';
+import { useMediaQuery } from 'react-responsive';
 
 const CIRCLE_RADIUS = 200;
 const ORBIT_RADIUS = 272;
@@ -10,15 +11,30 @@ const MIN_RADIUS = 176;
 const MAX_RADIUS = 304;
 const SNAP_DISTANCE = 248;
 
+// Ícones minimalistas criados para a Navbar do celular
+const NavIcons = {
+    '/sobre': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+    '/experiencia': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
+    '/projetos': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
+    '/contato': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+};
+
 const PIECES = [
-    { id: '/sobre', label: { br: 'Sobre', en: 'About' }, gap: 14 },
-    { id: '/experiencia', label: { br: 'Experiência', en: 'Experience' }, gap: 28 },
-    { id: '/projetos', label: { br: 'Projetos', en: 'Projects' }, gap: 20 },
-    { id: '/contato', label: { br: 'Contato', en: 'Contact' }, gap: 18 },
+    { id: '/sobre', label: { br: 'Sobre', en: 'About' }, gap: 14, icon: NavIcons['/sobre'] },
+    { id: '/experiencia', label: { br: 'Experiência', en: 'Experience' }, gap: 28, icon: NavIcons['/experiencia'] },
+    { id: '/projetos', label: { br: 'Projetos', en: 'Projects' }, gap: 20, icon: NavIcons['/projetos'] },
+    { id: '/contato', label: { br: 'Contato', en: 'Contact' }, gap: 18, icon: NavIcons['/contato'] },
 ];
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
 const DOUBLE_RUNES = RUNES + " " + RUNES;
+
+// Pequena Estrela Mágica para UI Mobile
+const Sparkle = () => (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" />
+    </svg>
+);
 
 function getPosition(angle, radius) {
     const rad = (angle * Math.PI) / 180;
@@ -118,13 +134,43 @@ function FragmentoDeMenu({ id, label, baseAngle, isActive, circleRotation, isSna
 }
 
 export function Navbar({ language = 'br', tutorialMode = false, onTutorialComplete }) {
+    const isMobile = useMediaQuery({ maxWidth: 768 });
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Estados do Desktop
     const [dragId, setDragId] = useState(null);
     const [circleRotation, setCircleRotation] = useState(0);
     const [isSnapping, setIsSnapping] = useState(false);
 
+    // Lógica do Texto Mágico Flutuante (Mobile)
+    const [showLabel, setShowLabel] = useState(false);
+    const [currentLabel, setCurrentLabel] = useState('');
+    const labelTimeoutRef = useRef(null);
+
+    function triggerLabel(labelText) {
+        setCurrentLabel(labelText);
+        setShowLabel(false); // Reseta animação se já estiver aparecendo
+
+        setTimeout(() => {
+            setShowLabel(true);
+            if (labelTimeoutRef.current) clearTimeout(labelTimeoutRef.current);
+            labelTimeoutRef.current = setTimeout(() => {
+                setShowLabel(false);
+            }, 2500); // Fica na tela por 2.5 segundos e some
+        }, 50);
+    }
+
+    // Aciona o texto flutuante toda vez que a rota muda
+    useEffect(() => {
+        const piece = PIECES.find(p => p.id === location.pathname);
+        if (piece) {
+            triggerLabel(piece.label[language]);
+        }
+        return () => { if (labelTimeoutRef.current) clearTimeout(labelTimeoutRef.current); };
+    }, [location.pathname, language]);
+
+    // Variáveis Comuns
     const activeIndex = Math.max(0, PIECES.findIndex(p => p.id === location.pathname));
     const currentTargetId = isSnapping && dragId ? dragId : location.pathname;
     const targetPiece = PIECES.find(p => p.id === currentTargetId) || PIECES[0];
@@ -133,10 +179,8 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
     const startGap = getPosition(currentGap, CIRCLE_RADIUS);
     const endGap = getPosition(-currentGap, CIRCLE_RADIUS);
 
-    function handleDragStart(event) {
-        setDragId(event.active.id);
-    }
-
+    // Funções DND (Desktop)
+    function handleDragStart(event) { setDragId(event.active.id); }
     function handleDragMove(event) {
         const { active, delta } = event;
         const pieceIndex = PIECES.findIndex(p => p.id === active.id);
@@ -159,31 +203,23 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
     function handleDragEnd(event) {
         if (isSnapping) {
             if (tutorialMode) {
-                // MUDANÇA: Disparando a transição de página ao finalizar o tutorial
                 if (document.startViewTransition) {
                     document.documentElement.classList.add('page-transition');
                     const transition = document.startViewTransition(() => {
-                        flushSync(() => {
-                            if (onTutorialComplete) onTutorialComplete();
-                        });
+                        flushSync(() => { if (onTutorialComplete) onTutorialComplete(); });
                     });
-                    transition.finished.finally(() => {
-                        document.documentElement.classList.remove('page-transition');
-                    });
+                    transition.finished.finally(() => { document.documentElement.classList.remove('page-transition'); });
                 } else {
                     if (onTutorialComplete) onTutorialComplete();
                 }
             } else {
-                // Comportamento normal de roteamento
                 const novaRota = event.active.id;
                 if (document.startViewTransition && novaRota !== location.pathname) {
                     document.documentElement.classList.add('page-transition');
                     const transition = document.startViewTransition(() => {
                         flushSync(() => navigate(novaRota));
                     });
-                    transition.finished.finally(() => {
-                        document.documentElement.classList.remove('page-transition');
-                    });
+                    transition.finished.finally(() => { document.documentElement.classList.remove('page-transition'); });
                 } else if (novaRota !== location.pathname) {
                     navigate(novaRota);
                 }
@@ -194,6 +230,88 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
         setDragId(null);
     }
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (BOTTOM NAVIGATION BAR MÁGICA)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        if (tutorialMode) {
+            return (
+                <div className="fixed bottom-0 left-0 w-full p-6 z-50 bg-gradient-to-t from-[#D0C697] dark:from-[#272516] to-transparent">
+                    <button
+                        onClick={() => {
+                            if (document.startViewTransition) {
+                                document.documentElement.classList.add('page-transition');
+                                const transition = document.startViewTransition(() => {
+                                    flushSync(() => { if (onTutorialComplete) onTutorialComplete(); });
+                                });
+                                transition.finished.finally(() => { document.documentElement.classList.remove('page-transition'); });
+                            } else {
+                                if (onTutorialComplete) onTutorialComplete();
+                            }
+                        }}
+                        className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm border border-[#4F2B33]/20 dark:border-[#91B09A]/30 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] shadow-[0_0_20px_rgba(79,43,51,0.4)] dark:shadow-[0_0_20px_rgba(145,176,154,0.3)] active:scale-95 transition-transform flex items-center justify-center gap-2"
+                    >
+                        <Sparkle />
+                        {language === 'en' ? 'Start Journey' : 'Iniciar Jornada'}
+                        <Sparkle />
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[95%] z-50 flex flex-col items-center">
+
+                {/* --- Rótulo Mágico Flutuante --- */}
+                <div
+                    className={`absolute bottom-full mb-4 flex items-center gap-2 px-5 py-2 rounded-full border border-[#4F2B33]/30 dark:border-[#91B09A]/30 bg-[#D0C697]/95 dark:bg-[#272516]/95 backdrop-blur-md shadow-[0_0_20px_rgba(79,43,51,0.2)] dark:shadow-[0_0_20px_rgba(145,176,154,0.2)] transition-all duration-500 ease-out pointer-events-none 
+                    ${showLabel ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'}`}
+                >
+                    <span className="text-[#4F2B33] dark:text-[#91B09A] animate-pulse"><Sparkle /></span>
+                    <span className="font-serif font-bold text-[15px] tracking-[0.2em] uppercase text-[#4F2B33] dark:text-[#D0C697]">
+                        {currentLabel}
+                    </span>
+                    <span className="text-[#4F2B33] dark:text-[#91B09A] animate-pulse"><Sparkle /></span>
+                </div>
+
+                {/* --- Navbar Base --- */}
+                <nav className="relative w-full max-w-sm h-16 rounded-2xl flex items-center justify-around px-2 bg-[#D0C697]/90 dark:bg-[#272516]/90 backdrop-blur-lg border border-[#4F2B33]/20 dark:border-[#91B09A]/20 shadow-[0_15px_40px_rgba(0,0,0,0.2)]">
+                    {PIECES.map((piece) => {
+                        const isActive = location.pathname === piece.id;
+
+                        return (
+                            <button
+                                key={piece.id}
+                                onClick={() => {
+                                    triggerLabel(piece.label[language]);
+                                    navigate(piece.id);
+                                }}
+                                className={`relative flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
+                                    isActive
+                                        ? 'text-[#D0C697] dark:text-[#272516] bg-[#4F2B33] dark:bg-[#91B09A] shadow-[0_0_15px_rgba(79,43,51,0.6)] dark:shadow-[0_0_15px_rgba(145,176,154,0.6)] -translate-y-2'
+                                        : 'text-[#4F2B33]/70 dark:text-[#91B09A]/70 hover:text-[#4F2B33] dark:hover:text-[#91B09A]'
+                                }`}
+                            >
+                                {/* Ícone central fixo */}
+                                <div className="scale-90">
+                                    {piece.icon}
+                                </div>
+
+                                {/* Pontinho estático indicando qual está ativo */}
+                                {isActive && (
+                                    <span className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-[#4F2B33] dark:bg-[#91B09A]" />
+                                )}
+                            </button>
+                        );
+                    })}
+                </nav>
+            </div>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <nav className="fixed bottom-0 left-0 w-full h-[320px] flex justify-center z-50 pointer-events-none overflow-hidden">
             <div className="relative w-[640px] h-[640px] pointer-events-auto">
@@ -238,24 +356,15 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
                         />
 
                         <g fill="currentColor" style={{ transition: 'all 0.3s' }} className={tutorialMode && !isSnapping ? 'animate-pulse' : ''}>
-                            <polygon
-                                points="-4,0 0,-4 4,0 0,4"
-                                transform={`translate(${startGap.x}, ${startGap.y}) rotate(${currentGap})`}
-                            />
-                            <polygon
-                                points="-4,0 0,-4 4,0 0,4"
-                                transform={`translate(${endGap.x}, ${endGap.y}) rotate(${-currentGap})`}
-                            />
+                            <polygon points="-4,0 0,-4 4,0 0,4" transform={`translate(${startGap.x}, ${startGap.y}) rotate(${currentGap})`} />
+                            <polygon points="-4,0 0,-4 4,0 0,4" transform={`translate(${endGap.x}, ${endGap.y}) rotate(${-currentGap})`} />
                         </g>
                     </svg>
 
                     {PIECES.map((piece, index) => {
                         const isActive = location.pathname === piece.id;
 
-                        // NOVA LÓGICA AQUI: Oculta a opção central se for o tutorial
-                        if (tutorialMode && isActive) {
-                            return null;
-                        }
+                        if (tutorialMode && isActive) return null;
 
                         const labelText = tutorialMode
                             ? (language === 'en' ? 'Continue' : 'Continuar')

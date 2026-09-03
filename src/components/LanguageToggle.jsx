@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DndContext, useDraggable, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
+import { useMediaQuery } from 'react-responsive';
 
 const CX = 50, CY = 50;
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
@@ -55,6 +56,7 @@ function CoinFace() {
     );
 }
 
+// Moeda Mágica para DESKTOP
 function MoedaMagica({ id, position, language, onToggle }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
     const [flipDegrees, setFlipDegrees] = useState(language === 'en' ? 180 : 0);
@@ -98,7 +100,6 @@ function MoedaMagica({ id, position, language, onToggle }) {
         }, 900);
     }
 
-    // MUDANÇA: A propriedade 'transition' inteira foi removida. O arraste volta a ser perfeitamente livre de lags.
     const wrapperStyle = {
         position: 'absolute',
         top: '0',
@@ -107,7 +108,8 @@ function MoedaMagica({ id, position, language, onToggle }) {
         height: '56px',
         transform: `translate3d(${currentX}px, ${currentY}px, 0)`,
         zIndex: isDragging ? 50 : 10,
-        perspective: '1200px'
+        perspective: '1200px',
+        WebkitPerspective: '1200px'
     };
 
     const tossStyle = {
@@ -121,11 +123,12 @@ function MoedaMagica({ id, position, language, onToggle }) {
 
     const flipStyle = {
         transformStyle: 'preserve-3d',
+        WebkitTransformStyle: 'preserve-3d',
         transform: `rotateX(${flipDegrees}deg)`,
         transition: 'transform 900ms cubic-bezier(0.45, 0.05, 0.55, 0.95)'
     };
 
-    const faceBase = "absolute inset-0 rounded-full flex flex-col items-center justify-center bg-[#D0C697] dark:bg-[#3B381E] border-[3px] border-[#4F2B33] dark:border-[#91B09A]";
+    const faceBase = "absolute inset-0 rounded-full flex flex-col items-center justify-center bg-[#D0C697] dark:bg-[#3B381E] border-[3px] border-[#4F2B33] dark:border-[#91B09A] shadow-[0_8px_16px_rgba(0,0,0,0.4)]";
 
     return (
         <div style={wrapperStyle} className="pointer-events-auto">
@@ -152,15 +155,15 @@ function MoedaMagica({ id, position, language, onToggle }) {
                 onClick={handleClick}
                 className={`absolute inset-0 cursor-grab active:cursor-grabbing touch-none transition-transform duration-300 ease-out ${isDragging ? 'scale-110' : 'scale-100'}`}
             >
-                <div style={tossStyle} className="relative w-14 h-14 drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
+                <div style={tossStyle} className="relative w-14 h-14">
                     <div style={flipStyle} className="relative w-full h-full">
-                        <div className={faceBase} style={{ backfaceVisibility: 'hidden' }}>
+                        <div className={faceBase} style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateX(0deg)' }}>
                             <CoinFace />
-                            <span className="relative z-10 text-[#4F2B33] dark:text-[#91B09A] font-serif font-black text-xl tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]" style={{ WebkitTextStroke: '0.5px currentColor' }}>BR</span>
+                            <span className="relative z-10 text-[#4F2B33] dark:text-[#91B09A] font-serif font-black text-xl tracking-wider">BR</span>
                         </div>
-                        <div className={faceBase} style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}>
+                        <div className={faceBase} style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}>
                             <CoinFace />
-                            <span className="relative z-10 text-[#4F2B33] dark:text-[#91B09A] font-serif font-black text-xl tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]" style={{ WebkitTextStroke: '0.5px currentColor' }}>EN</span>
+                            <span className="relative z-10 text-[#4F2B33] dark:text-[#91B09A] font-serif font-black text-xl tracking-wider">EN</span>
                         </div>
                     </div>
                 </div>
@@ -169,19 +172,94 @@ function MoedaMagica({ id, position, language, onToggle }) {
     );
 }
 
+// Moeda Mágica para MOBILE
+function MoedaMagicaMobile({ language, onToggle, isTutorial }) {
+    const [flipDegrees, setFlipDegrees] = useState(language === 'en' ? 180 : 0);
+    const [isFlipping, setIsFlipping] = useState(false);
+    const [isExpanding, setIsExpanding] = useState(false);
+
+    function handleClick() {
+        if (isFlipping) return;
+        setIsFlipping(true);
+        setIsExpanding(true);
+        setFlipDegrees(prev => prev + 540);
+
+        setTimeout(() => {
+            onToggle();
+        }, 250);
+
+        setTimeout(() => {
+            setIsFlipping(false);
+            setIsExpanding(false);
+        }, 900);
+    }
+
+    const flipStyle = {
+        transformStyle: 'preserve-3d',
+        WebkitTransformStyle: 'preserve-3d',
+        transform: `rotateX(${flipDegrees}deg)`,
+        transition: 'transform 900ms cubic-bezier(0.45, 0.05, 0.55, 0.95)'
+    };
+
+    const faceBase = "absolute inset-0 rounded-full flex flex-col items-center justify-center bg-[#D0C697] dark:bg-[#3B381E] border-[2px] md:border-[3px] border-[#4F2B33] dark:border-[#91B09A] shadow-[0_4px_8px_rgba(0,0,0,0.4)]";
+
+    // AQUI: Encontramos o meio termo. Agora elas dão um pequeno respiro em volta da moeda (0.65)
+    const currentScale = isExpanding ? (isTutorial ? 4 : 2) : (isTutorial ? 1.2 : 0.65);
+    const currentOpacity = isExpanding ? 0 : 0.5;
+
+    return (
+        <div
+            onClick={handleClick}
+            className={`relative pointer-events-auto cursor-pointer transition-all duration-500 active:scale-95 z-50 ${isTutorial ? 'w-20 h-20' : 'w-10 h-10'}`}
+            style={{ perspective: '1200px', WebkitPerspective: '1200px' }}
+        >
+            <div
+                className="absolute top-1/2 left-1/2 pointer-events-none"
+                style={{
+                    width: '100px', height: '100px', marginLeft: '-50px', marginTop: '-50px',
+                    transform: `scale(${currentScale})`, opacity: currentOpacity,
+                    transition: isExpanding ? 'transform 900ms cubic-bezier(0.25, 1, 0.5, 1), opacity 700ms ease-out' : 'transform 500ms ease-in-out, opacity 500ms ease-in'
+                }}
+            >
+                <svg width="100" height="100" viewBox="0 0 100 100" className="animate-[spin_20s_linear_infinite] text-[#4F2B33] dark:text-[#91B09A]">
+                    <path id={`mobile-coin-rune-${isTutorial ? 'big' : 'small'}`} d="M 50,15 A 35,35 0 1,1 49.9,15" fill="none" />
+                    <text fill="currentColor" fontSize="8" letterSpacing="4.5" fontWeight="bold">
+                        <textPath href={`#mobile-coin-rune-${isTutorial ? 'big' : 'small'}`} startOffset="0%">{DOUBLE_RUNES}</textPath>
+                    </text>
+                </svg>
+            </div>
+
+            <div style={flipStyle} className="relative w-full h-full">
+                <div className={faceBase} style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateX(0deg)' }}>
+                    <CoinFace />
+                    <span className={`relative z-10 text-[#4F2B33] dark:text-[#91B09A] font-serif font-black tracking-wider transition-all duration-500 ${isTutorial ? 'text-3xl' : 'text-sm'}`}>
+                        BR
+                    </span>
+                </div>
+                <div className={faceBase} style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}>
+                    <CoinFace />
+                    <span className={`relative z-10 text-[#4F2B33] dark:text-[#91B09A] font-serif font-black tracking-wider transition-all duration-500 ${isTutorial ? 'text-3xl' : 'text-sm'}`}>
+                        EN
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export function LanguageToggle({ language, onLanguageChange, tutorialMode = false, onTutorialComplete }) {
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [hasClicked, setHasClicked] = useState(false);
 
     useEffect(() => {
-        // Coloca a moeda no centro apenas quando o tutorial começa
         if (tutorialMode) {
             setPosition({
                 x: window.innerWidth / 2 - 32 - 28,
                 y: window.innerHeight / 2 - 32 - 28
             });
         }
-        // Ocultado o 'else' que forçava a moeda para o canto. Ela fica onde estiver.
     }, [tutorialMode]);
 
     const sensors = useSensors(
@@ -194,20 +272,16 @@ export function LanguageToggle({ language, onLanguageChange, tutorialMode = fals
         let finalX = position.x + delta.x;
         let finalY = position.y + delta.y;
 
-        // Limita a área para que a moeda não saia da tela
         finalX = Math.max(-10, Math.min(window.innerWidth - 70, finalX));
         finalY = Math.max(-10, Math.min(window.innerHeight - 70, finalY));
 
         if (tutorialMode) {
             const distanceToDropzone = Math.hypot(finalX, finalY);
             if (hasClicked && distanceToDropzone < 80) {
-                // Se acertou a zona tracejada, ela vai para a posição inicial (0,0) e completa o tutorial
                 finalX = 0;
                 finalY = 0;
                 if (onTutorialComplete) onTutorialComplete();
             }
-            // MUDANÇA: O 'else' do elástico foi completamente apagado.
-            // Se o usuário não acertar o alvo, a moeda simplesmente fica nas coordenadas em que ele soltou!
         }
 
         setPosition({ x: finalX, y: finalY });
@@ -225,9 +299,27 @@ export function LanguageToggle({ language, onLanguageChange, tutorialMode = fals
         }
     }
 
+    if (isMobile) {
+        return (
+            <div className={`fixed z-[60] flex items-center justify-center pointer-events-none ${
+                tutorialMode ? 'inset-0' : 'top-5 left-4'
+            }`}>
+                <MoedaMagicaMobile
+                    language={language}
+                    onToggle={() => {
+                        onLanguageChange(language === 'br' ? 'en' : 'br');
+                        if (tutorialMode && onTutorialComplete) {
+                            setTimeout(() => onTutorialComplete(), 1000);
+                        }
+                    }}
+                    isTutorial={tutorialMode}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="fixed top-8 left-8 z-[60] pointer-events-none w-14 h-14">
-
             <div
                 className={`absolute inset-0 rounded-full border-[3px] transition-all duration-500 ${
                     tutorialMode

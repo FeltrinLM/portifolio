@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { Text } from './Text';
 
 export function ResumeCard({ language = 'br', className = '' }) {
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
     const url = language === 'en' ? '/cv/cv_lorenzo_en.pdf' : '/cv/cv_lorenzo_br.pdf';
 
     const [showBubble, setShowBubble] = useState(false);
@@ -29,6 +32,18 @@ export function ResumeCard({ language = 'br', className = '' }) {
         return () => clearInterval(interval);
     }, [messages.length]);
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (SUMIR COM O CARD)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        // Retornar nulo significa que o componente não vai existir na tela.
+        // Faremos um botão tradicional de "Baixar CV" direto na página Sobre depois!
+        return null;
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <a
             href={url}
@@ -71,7 +86,6 @@ export function ResumeCard({ language = 'br', className = '' }) {
             `}</style>
 
             {/* --- BALÃO DE FALA --- */}
-            {/* Subimos o balão para bottom-[85%] e aplicamos as cores do Dark Mode */}
             <div
                 className={`absolute bottom-[85%] whitespace-nowrap px-3 py-1.5 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] text-[10px] md:text-[11px] font-bold rounded-lg shadow-lg transition-all duration-300 z-30 
                 ${showBubble && !isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}
@@ -81,7 +95,6 @@ export function ResumeCard({ language = 'br', className = '' }) {
             </div>
 
             {/* --- ESTRELINHAS MÍSTICAS ESPALHADAS --- */}
-            {/* No Dark Mode, as estrelas brilham na cor #D0C697 */}
             <div className="absolute inset-0 pointer-events-none z-0">
                 <span className="sparkle s-1 absolute top-[10%] left-[15%] text-[#4F2B33] dark:text-[#D0C697] text-[14px] opacity-0">✦</span>
                 <span className="sparkle s-2 absolute top-[35%] right-[5%] text-[#4F2B33] dark:text-[#D0C697] text-[10px] opacity-0">✦</span>
@@ -96,13 +109,10 @@ export function ResumeCard({ language = 'br', className = '' }) {
                 className="spin-magic relative w-14 h-24 md:w-16 md:h-28 z-20 mb-2"
                 style={{ transformStyle: 'preserve-3d' }}
             >
-                {/* 1. FACE DA FRENTE */}
-                {/* O fundo da carta no dark mode vira #91B09A */}
                 <div
                     className="absolute inset-0 flex flex-col items-center justify-start pt-3 gap-1.5 rounded-md md:rounded-lg border border-[#D0C697]/20 dark:border-[#3B381E]/20 bg-[#4F2B33] dark:bg-[#91B09A] shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden"
                     style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
                 >
-                    {/* O Ícone no dark mode assume a cor do fundo do site (#3B381E) para contraste perfeito */}
                     <div className="text-[#D0C697] dark:text-[#3B381E]">
                         <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                             <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
@@ -117,7 +127,6 @@ export function ResumeCard({ language = 'br', className = '' }) {
                     </div>
                 </div>
 
-                {/* 2. FACE DE TRÁS (VERSO DA CARTA) */}
                 <div
                     className="absolute inset-0 flex flex-col items-center justify-center rounded-md md:rounded-lg border border-[#D0C697]/20 dark:border-[#3B381E]/20 bg-[#4F2B33] dark:bg-[#91B09A] shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden"
                     style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}

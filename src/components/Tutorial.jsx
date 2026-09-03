@@ -1,9 +1,22 @@
 import { useEffect, useRef } from 'react';
+import { useMediaQuery } from 'react-responsive';
 
 export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
+    // Detecta se é mobile
+    const isMobile = useMediaQuery({ maxWidth: 768 });
     const initialLanguage = useRef(language);
 
+    // O PULO DO GATO: Se for mobile, finaliza o tutorial instantaneamente!
     useEffect(() => {
+        if (isMobile && tutorialPhase !== 'done') {
+            onNextPhase('done');
+        }
+    }, [isMobile, tutorialPhase, onNextPhase]);
+
+    useEffect(() => {
+        // Se for mobile, ignoramos os timers completamente
+        if (isMobile) return;
+
         // Fase 1: Tema
         if (tutorialPhase === 'theme' && !isDarkMode) {
             const timer = setTimeout(() => {
@@ -28,12 +41,14 @@ export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
             return () => clearTimeout(timer);
         }
 
-    }, [isDarkMode, tutorialPhase, onNextPhase, language]);
+    }, [isDarkMode, tutorialPhase, onNextPhase, language, isMobile]);
 
-    if (tutorialPhase === 'done') return null;
+    // Se o tutorial acabou (ou foi pulado pelo mobile), não renderiza nada
+    if (tutorialPhase === 'done' || isMobile) return null;
 
-    const topTextBr = "Para progredir, basta clicar pelo menos uma vez na moeda e arrastá-la para o espaço destacado.";
-    const topTextEn = "To progress, simply click the coin at least once and drag it to the highlighted space.";
+    // --- TEXTOS DO DESKTOP (Drag & Drop) ---
+    const topTextBrDesktop = "Para progredir, basta clicar pelo menos uma vez na moeda e arrastá-la para o espaço destacado.";
+    const topTextEnDesktop = "To progress, simply click the coin at least once and drag it to the highlighted space.";
 
     const bottomTextBr = "Não entendeu alguma coisa? É só clicar na moeda.";
     const bottomTextEn = "Didn't understand something? Just click the coin.";
@@ -44,15 +59,14 @@ export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
             {/* Ato 1 (Tema) */}
             <div className={`absolute bottom-[calc(50vh+80px)] left-1/2 -translate-x-1/2 w-full max-w-lg text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'theme' ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-2xl md:text-3xl text-[#4F2B33] dark:text-[#D0C697] font-serif tracking-wide leading-relaxed">
-                    Está escuro, não é? <br /><br />
-                    Talvez se você pegar aquele sol e arrastar para onde a lua está, dê uma clareada.
+                    Está escuro, não é? <br /><br /> Talvez se você pegar aquele sol e arrastar para onde a lua está, dê uma clareada.
                 </h2>
             </div>
 
             {/* Ato 2 (Idioma) */}
             <div className={`absolute bottom-[calc(50vh+80px)] left-1/2 -translate-x-1/2 w-full max-w-2xl text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'language' ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-2xl md:text-3xl text-[#4F2B33] dark:text-[#D0C697] font-serif tracking-wide leading-relaxed transition-all duration-500">
-                    {language === 'br' ? topTextBr : topTextEn}
+                    {language === 'br' ? topTextBrDesktop : topTextEnDesktop}
                 </h2>
             </div>
             <div className={`absolute top-[calc(50vh+80px)] left-1/2 -translate-x-1/2 w-full max-w-lg text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'language' ? 'opacity-100' : 'opacity-0'}`}>

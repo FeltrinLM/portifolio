@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; // <-- Importado o AnimatePresence
+import { useMediaQuery } from 'react-responsive';
 import { Text } from '../components/Text';
 
 const LocationIcon = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
@@ -32,6 +33,12 @@ const cardVariants = {
 };
 
 export function Experience({ language = 'br' }) {
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+
+    // Estado para o Mobile: controla qual experiência está expandida (0 = a primeira)
+    const [expandedIndex, setExpandedIndex] = useState(0);
+
+    // Estados do Desktop (Carrossel 3D)
     const [activeIndex, setActiveIndex] = useState(0);
     const isScrolling = useRef(false);
 
@@ -52,6 +59,122 @@ export function Experience({ language = 'br' }) {
         return () => window.removeEventListener('wheel', handleWheel);
     }, [activeIndex]);
 
+    // ----------------------------------------------------------------------
+    // 3. A INTERCEPTAÇÃO MOBILE (ACCORDION DE EXPERIÊNCIA)
+    // ----------------------------------------------------------------------
+    if (isMobile) {
+        return (
+            <div className="w-full min-h-screen flex flex-col pt-12 pb-28 px-4 overflow-x-hidden">
+
+                {/* Cabeçalho Mobile */}
+                <div className="relative z-20 flex flex-col items-center gap-1 text-center w-full mb-8 mt-4">
+                    <Text variant="title" as="h1" className="text-4xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
+                        {language === 'en' ? 'My Experience' : 'Minha Experiência'}
+                    </Text>
+                    <div className="flex items-center gap-3 text-[#4F2B33]/80 dark:text-[#91B09A]/90 mt-1">
+                        <div className="w-6 h-px bg-current opacity-40"></div>
+                        <Text variant="text" as="p" className="text-base tracking-widest">
+                            {language === 'en' ? 'The Journey So Far' : 'A Jornada Até Aqui'}
+                        </Text>
+                        <div className="w-6 h-px bg-current opacity-40"></div>
+                    </div>
+                </div>
+
+                {/* Lista de Experiências (Accordion) */}
+                <div className="flex flex-col gap-4 w-full">
+                    {experiences.map((exp, index) => {
+                        const isExpanded = expandedIndex === index;
+
+                        return (
+                            <div
+                                key={index}
+                                onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                                className={`w-full rounded-[24px] border transition-all duration-300 ease-in-out relative overflow-hidden flex flex-col p-5 cursor-pointer
+                                    ${isExpanded
+                                    ? 'shadow-md border-[#4F2B33]/30 dark:border-[#91B09A]/40 bg-[#4F2B33]/[0.04] dark:bg-[#91B09A]/[0.04]'
+                                    : 'shadow-sm border-[#4F2B33]/20 dark:border-[#91B09A]/20 bg-[#4F2B33]/[0.02] dark:bg-[#91B09A]/[0.02] hover:bg-[#4F2B33]/[0.04] dark:hover:bg-[#91B09A]/[0.04]'
+                                }`}
+                            >
+                                {/* Header do Card (Sempre Visível) */}
+                                <div className="flex justify-between items-center w-full">
+                                    <div className="flex items-center gap-4 pr-2">
+                                        <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] shrink-0">
+                                            {exp.icon}
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <Text variant="title" as="h2" className="text-xl font-bold text-[#4F2B33] dark:text-[#D0C697] leading-tight">
+                                                {language === 'en' ? exp.roleEn : exp.roleBr}
+                                            </Text>
+                                            <Text variant="text" as="span" className="text-[13px] font-bold opacity-70 mt-1 uppercase tracking-widest text-[#4F2B33] dark:text-[#D0C697]">
+                                                {exp.company}
+                                            </Text>
+                                        </div>
+                                    </div>
+
+                                    {/* Ícone de Seta que vira quando abre */}
+                                    <motion.div
+                                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="shrink-0 text-[#4F2B33] dark:text-[#91B09A]"
+                                    >
+                                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                            <polyline points="6 9 12 15 18 9" />
+                                        </svg>
+                                    </motion.div>
+                                </div>
+
+                                {/* Corpo do Card (Expande Suavemente) */}
+                                <AnimatePresence initial={false}>
+                                    {isExpanded && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="pt-5 pb-1 flex flex-col gap-4 border-t border-[#4F2B33]/10 dark:border-[#91B09A]/10 mt-4">
+
+                                                {/* Data e Localização */}
+                                                <div className="flex flex-col gap-2 text-xs font-medium text-[#4F2B33]/80 dark:text-[#91B09A]/90">
+                                                    <div className="flex items-center gap-1.5 opacity-80">
+                                                        <LocationIcon />
+                                                        <span>{language === 'en' ? exp.locationEn : exp.locationBr}</span>
+                                                    </div>
+                                                    <div className="self-start bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 px-3 py-1.5 rounded-full uppercase tracking-wider text-[#4F2B33] dark:text-[#D0C697] font-bold text-[10px]">
+                                                        {language === 'en' ? exp.dateEn : exp.dateBr}
+                                                    </div>
+                                                </div>
+
+                                                {/* Descrição */}
+                                                <Text variant="text" as="p" className="text-[13px] text-[#4F2B33]/90 dark:text-[#91B09A]/90 leading-relaxed">
+                                                    {language === 'en' ? exp.descriptionEn : exp.descriptionBr}
+                                                </Text>
+
+                                                {/* Tags */}
+                                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                                    {exp.tags.map((tag, tagIndex) => (
+                                                        <div key={tagIndex} className="px-3 py-1 rounded bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] text-[10px] font-bold tracking-wider uppercase">
+                                                            {tag}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. A VERSÃO DESKTOP INTACTA
+    // ----------------------------------------------------------------------
     return (
         <div className="fixed inset-0 pt-8 md:pt-12 pb-6 px-6 bg-[#D0C697] dark:bg-[#272516] overflow-hidden flex flex-col items-center justify-start">
             <div className="absolute z-0 w-[600px] h-[600px] top-10 -right-20 bg-[#4F2B33]/5 dark:bg-[#91B09A]/5 blur-[120px] rounded-full pointer-events-none" />
