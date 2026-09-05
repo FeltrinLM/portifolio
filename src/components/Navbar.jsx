@@ -11,7 +11,6 @@ const MIN_RADIUS = 176;
 const MAX_RADIUS = 304;
 const SNAP_DISTANCE = 248;
 
-// Ícones minimalistas criados para a Navbar do celular
 const NavIcons = {
     '/sobre': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
     '/experiencia': <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
@@ -29,7 +28,6 @@ const PIECES = [
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
 const DOUBLE_RUNES = RUNES + " " + RUNES;
 
-// Pequena Estrela Mágica para UI Mobile
 const Sparkle = () => (
     <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" />
@@ -109,6 +107,7 @@ function FragmentoDeMenu({ id, label, baseAngle, isActive, circleRotation, isSna
             style={style}
             {...listeners}
             {...attributes}
+            aria-label={label}
             className={`select-none touch-none ${dynamicClass} ${isDragging ? '' : 'transition-all duration-500 ease-out'}`}
         >
             <svg width="112" height="48" viewBox="0 0 112 48" className="overflow-visible pointer-events-none fill-current">
@@ -138,30 +137,27 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Estados do Desktop
     const [dragId, setDragId] = useState(null);
     const [circleRotation, setCircleRotation] = useState(0);
     const [isSnapping, setIsSnapping] = useState(false);
 
-    // Lógica do Texto Mágico Flutuante (Mobile)
     const [showLabel, setShowLabel] = useState(false);
     const [currentLabel, setCurrentLabel] = useState('');
     const labelTimeoutRef = useRef(null);
 
     function triggerLabel(labelText) {
         setCurrentLabel(labelText);
-        setShowLabel(false); // Reseta animação se já estiver aparecendo
+        setShowLabel(false);
 
         setTimeout(() => {
             setShowLabel(true);
             if (labelTimeoutRef.current) clearTimeout(labelTimeoutRef.current);
             labelTimeoutRef.current = setTimeout(() => {
                 setShowLabel(false);
-            }, 2500); // Fica na tela por 2.5 segundos e some
+            }, 2500);
         }, 50);
     }
 
-    // Aciona o texto flutuante toda vez que a rota muda
     useEffect(() => {
         const piece = PIECES.find(p => p.id === location.pathname);
         if (piece) {
@@ -170,7 +166,6 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
         return () => { if (labelTimeoutRef.current) clearTimeout(labelTimeoutRef.current); };
     }, [location.pathname, language]);
 
-    // Variáveis Comuns
     const activeIndex = Math.max(0, PIECES.findIndex(p => p.id === location.pathname));
     const currentTargetId = isSnapping && dragId ? dragId : location.pathname;
     const targetPiece = PIECES.find(p => p.id === currentTargetId) || PIECES[0];
@@ -179,7 +174,6 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
     const startGap = getPosition(currentGap, CIRCLE_RADIUS);
     const endGap = getPosition(-currentGap, CIRCLE_RADIUS);
 
-    // Funções DND (Desktop)
     function handleDragStart(event) { setDragId(event.active.id); }
     function handleDragMove(event) {
         const { active, delta } = event;
@@ -230,9 +224,6 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
         setDragId(null);
     }
 
-    // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (BOTTOM NAVIGATION BAR MÁGICA)
-    // ----------------------------------------------------------------------
     if (isMobile) {
         if (tutorialMode) {
             return (
@@ -261,8 +252,6 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
 
         return (
             <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[95%] z-50 flex flex-col items-center">
-
-                {/* --- Rótulo Mágico Flutuante --- */}
                 <div
                     className={`absolute bottom-full mb-4 flex items-center gap-2 px-5 py-2 rounded-full border border-[#4F2B33]/30 dark:border-[#91B09A]/30 bg-[#D0C697]/95 dark:bg-[#272516]/95 backdrop-blur-md shadow-[0_0_20px_rgba(79,43,51,0.2)] dark:shadow-[0_0_20px_rgba(145,176,154,0.2)] transition-all duration-500 ease-out pointer-events-none 
                     ${showLabel ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'}`}
@@ -274,7 +263,6 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
                     <span className="text-[#4F2B33] dark:text-[#91B09A] animate-pulse"><Sparkle /></span>
                 </div>
 
-                {/* --- Navbar Base --- */}
                 <nav className="relative w-full max-w-sm h-16 rounded-2xl flex items-center justify-around px-2 bg-[#D0C697]/90 dark:bg-[#272516]/90 backdrop-blur-lg border border-[#4F2B33]/20 dark:border-[#91B09A]/20 shadow-[0_15px_40px_rgba(0,0,0,0.2)]">
                     {PIECES.map((piece) => {
                         const isActive = location.pathname === piece.id;
@@ -282,6 +270,7 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
                         return (
                             <button
                                 key={piece.id}
+                                aria-label={piece.label[language]}
                                 onClick={() => {
                                     triggerLabel(piece.label[language]);
                                     navigate(piece.id);
@@ -292,12 +281,10 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
                                         : 'text-[#4F2B33]/70 dark:text-[#91B09A]/70 hover:text-[#4F2B33] dark:hover:text-[#91B09A]'
                                 }`}
                             >
-                                {/* Ícone central fixo */}
                                 <div className="scale-90">
                                     {piece.icon}
                                 </div>
 
-                                {/* Pontinho estático indicando qual está ativo */}
                                 {isActive && (
                                     <span className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-[#4F2B33] dark:bg-[#91B09A]" />
                                 )}
@@ -309,9 +296,6 @@ export function Navbar({ language = 'br', tutorialMode = false, onTutorialComple
         );
     }
 
-    // ----------------------------------------------------------------------
-    // 4. A VERSÃO DESKTOP INTACTA
-    // ----------------------------------------------------------------------
     return (
         <nav className="fixed bottom-0 left-0 w-full h-[320px] flex justify-center z-50 pointer-events-none overflow-hidden">
             <div className="relative w-[640px] h-[640px] pointer-events-auto">

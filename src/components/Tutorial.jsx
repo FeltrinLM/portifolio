@@ -1,12 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
 export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
-    // Detecta se é mobile
     const isMobile = useMediaQuery({ maxWidth: 768 });
-    const initialLanguage = useRef(language);
 
-    // O PULO DO GATO: Se for mobile, finaliza o tutorial instantaneamente!
     useEffect(() => {
         if (isMobile && tutorialPhase !== 'done') {
             onNextPhase('done');
@@ -14,39 +11,31 @@ export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
     }, [isMobile, tutorialPhase, onNextPhase]);
 
     useEffect(() => {
-        // Se for mobile, ignoramos os timers completamente
         if (isMobile) return;
 
-        // Fase 1: Tema
+        let timer;
+
         if (tutorialPhase === 'theme' && !isDarkMode) {
-            const timer = setTimeout(() => {
+            timer = setTimeout(() => {
                 onNextPhase('empty_after_theme');
             }, 1000);
-            return () => clearTimeout(timer);
-        }
-
-        // Intervalo 1
-        if (tutorialPhase === 'empty_after_theme') {
-            const timer = setTimeout(() => {
+        } else if (tutorialPhase === 'empty_after_theme') {
+            timer = setTimeout(() => {
                 onNextPhase('language');
             }, 1000);
-            return () => clearTimeout(timer);
-        }
-
-        // Intervalo 2
-        if (tutorialPhase === 'empty_after_language') {
-            const timer = setTimeout(() => {
+        } else if (tutorialPhase === 'empty_after_language') {
+            timer = setTimeout(() => {
                 onNextPhase('navbar');
             }, 1000);
-            return () => clearTimeout(timer);
         }
 
-    }, [isDarkMode, tutorialPhase, onNextPhase, language, isMobile]);
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [isDarkMode, tutorialPhase, onNextPhase, isMobile]);
 
-    // Se o tutorial acabou (ou foi pulado pelo mobile), não renderiza nada
     if (tutorialPhase === 'done' || isMobile) return null;
 
-    // --- TEXTOS DO DESKTOP (Drag & Drop) ---
     const topTextBrDesktop = "Para progredir, basta clicar pelo menos uma vez na moeda e arrastá-la para o espaço destacado.";
     const topTextEnDesktop = "To progress, simply click the coin at least once and drag it to the highlighted space.";
 
@@ -56,14 +45,12 @@ export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
     return (
         <div className="fixed inset-0 z-50 pointer-events-none">
 
-            {/* Ato 1 (Tema) */}
             <div className={`absolute bottom-[calc(50vh+80px)] left-1/2 -translate-x-1/2 w-full max-w-lg text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'theme' ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-2xl md:text-3xl text-[#4F2B33] dark:text-[#D0C697] font-serif tracking-wide leading-relaxed">
                     Está escuro, não é? <br /><br /> Talvez se você pegar aquele sol e arrastar para onde a lua está, dê uma clareada.
                 </h2>
             </div>
 
-            {/* Ato 2 (Idioma) */}
             <div className={`absolute bottom-[calc(50vh+80px)] left-1/2 -translate-x-1/2 w-full max-w-2xl text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'language' ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-2xl md:text-3xl text-[#4F2B33] dark:text-[#D0C697] font-serif tracking-wide leading-relaxed transition-all duration-500">
                     {language === 'br' ? topTextBrDesktop : topTextEnDesktop}
@@ -75,7 +62,6 @@ export function Tutorial({ isDarkMode, tutorialPhase, onNextPhase, language }) {
                 </h2>
             </div>
 
-            {/* Ato 3 (Navbar) */}
             <div className={`absolute bottom-[calc(50vh+120px)] left-1/2 -translate-x-1/2 w-full max-w-lg text-center px-6 transition-opacity duration-1000 ${tutorialPhase === 'navbar' ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-2xl md:text-3xl text-[#4F2B33] dark:text-[#D0C697] font-serif tracking-wide leading-relaxed">
                     {language === 'br'

@@ -44,11 +44,11 @@ function CoinFace() {
             className="absolute inset-0 w-full h-full text-[#4F2B33] dark:text-[#91B09A] pointer-events-none"
         >
             {BEAD_DOTS.map((p, i) => (
-                <circle key={i} cx={p.x} cy={p.y} r={1.1} fill="currentColor" />
+                <circle key={`bead-${i}`} cx={p.x} cy={p.y} r={1.1} fill="currentColor" />
             ))}
             <path d={ROPE_PATH} fill="none" stroke="currentColor" strokeWidth={1.1} opacity={0.85} />
             {TICKS.map((t, i) => (
-                <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="currentColor" strokeWidth={0.6} opacity={0.55} />
+                <line key={`tick-${i}`} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="currentColor" strokeWidth={0.6} opacity={0.55} />
             ))}
             <circle cx={CX} cy={CY} r={17} fill="none" stroke="currentColor" strokeWidth={1.2} />
             <rect x={CX - 12} y={CY - 12} width={24} height={24} transform={`rotate(45 ${CX} ${CY})`} fill="none" stroke="currentColor" strokeWidth={0.8} opacity={0.6} />
@@ -56,7 +56,6 @@ function CoinFace() {
     );
 }
 
-// Moeda Mágica para DESKTOP
 function MoedaMagica({ id, position, language, onToggle }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
     const [flipDegrees, setFlipDegrees] = useState(language === 'en' ? 180 : 0);
@@ -100,6 +99,13 @@ function MoedaMagica({ id, position, language, onToggle }) {
         }, 900);
     }
 
+    function handleKeyDown(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleClick();
+        }
+    }
+
     const wrapperStyle = {
         position: 'absolute',
         top: '0',
@@ -129,6 +135,7 @@ function MoedaMagica({ id, position, language, onToggle }) {
     };
 
     const faceBase = "absolute inset-0 rounded-full flex flex-col items-center justify-center bg-[#D0C697] dark:bg-[#3B381E] border-[3px] border-[#4F2B33] dark:border-[#91B09A] shadow-[0_8px_16px_rgba(0,0,0,0.4)]";
+    const ariaLabelText = language === 'en' ? 'Switch language to Portuguese' : 'Mudar idioma para Inglês';
 
     return (
         <div style={wrapperStyle} className="pointer-events-auto">
@@ -152,7 +159,11 @@ function MoedaMagica({ id, position, language, onToggle }) {
                 ref={setNodeRef}
                 {...listeners}
                 {...attributes}
+                role="button"
+                tabIndex={0}
+                aria-label={ariaLabelText}
                 onClick={handleClick}
+                onKeyDown={handleKeyDown}
                 className={`absolute inset-0 cursor-grab active:cursor-grabbing touch-none transition-transform duration-300 ease-out ${isDragging ? 'scale-110' : 'scale-100'}`}
             >
                 <div style={tossStyle} className="relative w-14 h-14">
@@ -172,7 +183,6 @@ function MoedaMagica({ id, position, language, onToggle }) {
     );
 }
 
-// Moeda Mágica para MOBILE
 function MoedaMagicaMobile({ language, onToggle, isTutorial }) {
     const [flipDegrees, setFlipDegrees] = useState(language === 'en' ? 180 : 0);
     const [isFlipping, setIsFlipping] = useState(false);
@@ -194,6 +204,13 @@ function MoedaMagicaMobile({ language, onToggle, isTutorial }) {
         }, 900);
     }
 
+    function handleKeyDown(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleClick();
+        }
+    }
+
     const flipStyle = {
         transformStyle: 'preserve-3d',
         WebkitTransformStyle: 'preserve-3d',
@@ -203,13 +220,17 @@ function MoedaMagicaMobile({ language, onToggle, isTutorial }) {
 
     const faceBase = "absolute inset-0 rounded-full flex flex-col items-center justify-center bg-[#D0C697] dark:bg-[#3B381E] border-[2px] md:border-[3px] border-[#4F2B33] dark:border-[#91B09A] shadow-[0_4px_8px_rgba(0,0,0,0.4)]";
 
-    // AQUI: Encontramos o meio termo. Agora elas dão um pequeno respiro em volta da moeda (0.65)
     const currentScale = isExpanding ? (isTutorial ? 4 : 2) : (isTutorial ? 1.2 : 0.65);
     const currentOpacity = isExpanding ? 0 : 0.5;
+    const ariaLabelText = language === 'en' ? 'Switch language to Portuguese' : 'Mudar idioma para Inglês';
 
     return (
         <div
+            role="button"
+            tabIndex={0}
+            aria-label={ariaLabelText}
             onClick={handleClick}
+            onKeyDown={handleKeyDown}
             className={`relative pointer-events-auto cursor-pointer transition-all duration-500 active:scale-95 z-50 ${isTutorial ? 'w-20 h-20' : 'w-10 h-10'}`}
             style={{ perspective: '1200px', WebkitPerspective: '1200px' }}
         >

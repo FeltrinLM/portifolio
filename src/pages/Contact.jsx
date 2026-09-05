@@ -2,11 +2,9 @@ import { useMediaQuery } from 'react-responsive';
 import { Text } from '../components/Text';
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ";
-// Repetimos as runas para preencher a borda e permitir a animação contínua no Desktop
 const RUNES_REPEAT = RUNES.repeat(8);
 
 export function Contact({ language = 'br' }) {
-    // Hook de detecção mobile
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
     const contactLinks = [
@@ -15,7 +13,7 @@ export function Contact({ language = 'br' }) {
             value: 'feltrinlorenzo505@gmail.com',
             url: 'mailto:feltrinlorenzo505@gmail.com',
             icon: (
-                <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
             )
@@ -25,7 +23,7 @@ export function Contact({ language = 'br' }) {
             value: 'FeltrinLM',
             url: 'https://github.com/FeltrinLM',
             icon: (
-                <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/>
                 </svg>
             )
@@ -35,7 +33,7 @@ export function Contact({ language = 'br' }) {
             value: 'lorenzo-feltrin',
             url: 'https://www.linkedin.com/in/lorenzo-feltrin-086870227/',
             icon: (
-                <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
                     <circle cx="4" cy="4" r="2"/>
                 </svg>
@@ -43,14 +41,9 @@ export function Contact({ language = 'br' }) {
         }
     ];
 
-    // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (TELA ÚNICA, CARDS ESPAÇOSOS E LIMPOS)
-    // ----------------------------------------------------------------------
     if (isMobile) {
         return (
             <div className="w-full min-h-screen flex flex-col items-center pt-12 pb-24 px-4 overflow-x-hidden">
-
-                {/* Título Mobile */}
                 <div className="relative z-20 flex flex-col items-center gap-1 text-center w-full mb-8 mt-4">
                     <Text variant="title" as="h1" className="text-4xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                         {language === 'en' ? 'Contact' : 'Contato'}
@@ -64,25 +57,22 @@ export function Contact({ language = 'br' }) {
                     </div>
                 </div>
 
-                {/* Cards Empilhados Verticalmente (Mais Altos e Espaçosos) */}
                 <div className="flex flex-col gap-6 w-full items-center">
-                    {contactLinks.map((link, index) => (
+                    {contactLinks.map((link) => (
                         <a
-                            key={index}
+                            key={link.name}
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            // Aumentei a altura para 150px, a largura max para 340px e adicionei mais padding (p-5)
+                            aria-label={link.name}
                             className="relative flex flex-col items-center justify-center p-5 w-full max-w-[340px] h-[150px] rounded-[28px] border border-[#4F2B33]/30 dark:border-[#91B09A]/30 bg-gradient-to-br from-[#4F2B33]/[0.05] to-transparent dark:from-[#91B09A]/[0.05] dark:to-transparent backdrop-blur-xl shadow-sm active:scale-[0.98] transition-transform overflow-hidden group"
                         >
                             <div className="relative z-10 flex flex-col items-center justify-center gap-3 w-full h-full">
-                                {/* Ícone maior com mais respiro */}
                                 <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] transition-colors group-active:bg-[#4F2B33] group-active:text-[#D0C697] dark:group-active:bg-[#91B09A] dark:group-active:text-[#3B381E]">
                                     <div className="scale-[0.85]">{link.icon}</div>
                                 </div>
 
                                 <div className="flex flex-col items-center text-center w-full">
-                                    {/* Textos ligeiramente maiores e com espaçamentos mais relaxados */}
                                     <Text variant="title" as="h2" className="text-2xl font-bold text-[#4F2B33] dark:text-[#D0C697] leading-none">
                                         {link.name}
                                     </Text>
@@ -98,12 +88,8 @@ export function Contact({ language = 'br' }) {
         );
     }
 
-    // ----------------------------------------------------------------------
-    // 4. A VERSÃO DESKTOP INTACTA
-    // ----------------------------------------------------------------------
     return (
         <div className="relative min-h-screen flex flex-col items-center justify-start px-6 pb-[360px] pt-4 w-full overflow-hidden">
-
             <div className="absolute top-10 z-0 w-56 h-56 md:w-[400px] md:h-[400px] bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 blur-[80px] rounded-full pointer-events-none"></div>
 
             <div className="relative z-20 flex flex-col items-center gap-2 text-center w-full max-w-6xl mx-auto shrink-0">
@@ -122,7 +108,6 @@ export function Contact({ language = 'br' }) {
             <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
                 <div className="relative w-full h-72 md:h-80 flex justify-center">
                     {contactLinks.map((link, index) => {
-
                         let wrapperClasses = "";
                         if (index === 0) wrapperClasses = "z-10 -translate-x-16 md:-translate-x-28 translate-y-6 md:translate-y-8 -rotate-[14deg]";
                         if (index === 1) wrapperClasses = "z-20";
@@ -130,17 +115,17 @@ export function Contact({ language = 'br' }) {
 
                         return (
                             <div
-                                key={index}
+                                key={link.name}
                                 className={`group absolute bottom-0 origin-bottom transition-all duration-300 ease-out hover:z-50 ${wrapperClasses}`}
                             >
                                 <a
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    aria-label={link.name}
                                     className="relative flex flex-col items-center justify-center py-10 px-4 w-48 h-72 md:w-56 md:h-80 rounded-2xl md:rounded-3xl border border-[#4F2B33]/30 dark:border-[#91B09A]/30 bg-gradient-to-br from-[#4F2B33]/[0.05] to-transparent dark:from-[#91B09A]/[0.05] dark:to-transparent backdrop-blur-xl shadow-[0_8px_30px_rgba(79,43,51,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] transition-all duration-300 ease-out group-hover:-translate-y-12 md:group-hover:-translate-y-16 group-hover:shadow-[0_20px_40px_-10px_rgba(79,43,51,0.12)] dark:group-hover:shadow-[0_20px_40px_-10px_rgba(145,176,154,0.1)] overflow-hidden"
                                 >
-                                    {/* --- BORDAS ESTILO TARÔ E RUNAS (Desktop) --- */}
-                                    <svg viewBox="0 0 224 320" className="absolute inset-0 w-full h-full hidden md:block text-[#4F2B33]/50 dark:text-[#91B09A]/40 pointer-events-none">
+                                    <svg viewBox="0 0 224 320" className="absolute inset-0 w-full h-full hidden md:block text-[#4F2B33]/50 dark:text-[#91B09A]/40 pointer-events-none" aria-hidden="true">
                                         <rect x="10" y="10" width="204" height="300" rx="12" fill="none" stroke="currentColor" strokeWidth="1.5" />
                                         <rect x="28" y="28" width="168" height="264" rx="8" fill="none" stroke="currentColor" strokeWidth="1" />
                                         <path id={`desktop-path-${index}`} d="M 23,33 A 10,10 0 0 1 33,23 H 191 A 10,10 0 0 1 201,33 V 287 A 10,10 0 0 1 191,297 H 33 A 10,10 0 0 1 23,287 Z" fill="none" />
@@ -156,7 +141,6 @@ export function Contact({ language = 'br' }) {
                                         </text>
                                     </svg>
 
-                                    {/* Conteúdo da Carta */}
                                     <div className="relative z-10 flex flex-col items-center justify-center gap-6 w-full h-full px-2">
                                         <div className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] transition-colors duration-300 group-hover:bg-[#4F2B33] group-hover:text-[#D0C697] dark:group-hover:bg-[#91B09A] dark:group-hover:text-[#3B381E]">
                                             {link.icon}

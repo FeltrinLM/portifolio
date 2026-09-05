@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; // <-- Importado o AnimatePresence
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMediaQuery } from 'react-responsive';
 import { Text } from '../components/Text';
 
-const LocationIcon = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-const BriefcaseIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>;
-const ProfileIcon = () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>;
+const LocationIcon = () => <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+const BriefcaseIcon = () => <svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>;
+const ProfileIcon = () => <svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>;
 
 const experiences = [
     {
@@ -34,13 +34,11 @@ const cardVariants = {
 
 export function Experience({ language = 'br' }) {
     const isMobile = useMediaQuery({ maxWidth: 768 });
-
-    // Estado para o Mobile: controla qual experiência está expandida (0 = a primeira)
     const [expandedIndex, setExpandedIndex] = useState(0);
-
-    // Estados do Desktop (Carrossel 3D)
     const [activeIndex, setActiveIndex] = useState(0);
+
     const isScrolling = useRef(false);
+    const scrollTimeoutRef = useRef(null);
 
     useEffect(() => {
         const handleWheel = (e) => {
@@ -51,22 +49,27 @@ export function Experience({ language = 'br' }) {
             if (newIndex >= 0 && newIndex < experiences.length) {
                 isScrolling.current = true;
                 setActiveIndex(newIndex);
-                setTimeout(() => (isScrolling.current = false), 350);
+                scrollTimeoutRef.current = setTimeout(() => (isScrolling.current = false), 350);
             }
         };
 
-        window.addEventListener('wheel', handleWheel);
-        return () => window.removeEventListener('wheel', handleWheel);
+        window.addEventListener('wheel', handleWheel, { passive: true });
+        return () => {
+            window.removeEventListener('wheel', handleWheel);
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        };
     }, [activeIndex]);
 
-    // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (ACCORDION DE EXPERIÊNCIA)
-    // ----------------------------------------------------------------------
+    function handleAccordionKeyDown(e, index) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setExpandedIndex(expandedIndex === index ? null : index);
+        }
+    }
+
     if (isMobile) {
         return (
             <div className="w-full min-h-screen flex flex-col pt-12 pb-28 px-4 overflow-x-hidden">
-
-                {/* Cabeçalho Mobile */}
                 <div className="relative z-20 flex flex-col items-center gap-1 text-center w-full mb-8 mt-4">
                     <Text variant="title" as="h1" className="text-4xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                         {language === 'en' ? 'My Experience' : 'Minha Experiência'}
@@ -80,22 +83,24 @@ export function Experience({ language = 'br' }) {
                     </div>
                 </div>
 
-                {/* Lista de Experiências (Accordion) */}
                 <div className="flex flex-col gap-4 w-full">
                     {experiences.map((exp, index) => {
                         const isExpanded = expandedIndex === index;
 
                         return (
                             <div
-                                key={index}
+                                key={exp.company}
+                                role="button"
+                                tabIndex={0}
+                                aria-expanded={isExpanded}
                                 onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                                onKeyDown={(e) => handleAccordionKeyDown(e, index)}
                                 className={`w-full rounded-[24px] border transition-all duration-300 ease-in-out relative overflow-hidden flex flex-col p-5 cursor-pointer
                                     ${isExpanded
                                     ? 'shadow-md border-[#4F2B33]/30 dark:border-[#91B09A]/40 bg-[#4F2B33]/[0.04] dark:bg-[#91B09A]/[0.04]'
                                     : 'shadow-sm border-[#4F2B33]/20 dark:border-[#91B09A]/20 bg-[#4F2B33]/[0.02] dark:bg-[#91B09A]/[0.02] hover:bg-[#4F2B33]/[0.04] dark:hover:bg-[#91B09A]/[0.04]'
                                 }`}
                             >
-                                {/* Header do Card (Sempre Visível) */}
                                 <div className="flex justify-between items-center w-full">
                                     <div className="flex items-center gap-4 pr-2">
                                         <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] shrink-0">
@@ -111,19 +116,17 @@ export function Experience({ language = 'br' }) {
                                         </div>
                                     </div>
 
-                                    {/* Ícone de Seta que vira quando abre */}
                                     <motion.div
                                         animate={{ rotate: isExpanded ? 180 : 0 }}
                                         transition={{ duration: 0.3 }}
                                         className="shrink-0 text-[#4F2B33] dark:text-[#91B09A]"
                                     >
-                                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                        <svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                                             <polyline points="6 9 12 15 18 9" />
                                         </svg>
                                     </motion.div>
                                 </div>
 
-                                {/* Corpo do Card (Expande Suavemente) */}
                                 <AnimatePresence initial={false}>
                                     {isExpanded && (
                                         <motion.div
@@ -135,7 +138,6 @@ export function Experience({ language = 'br' }) {
                                         >
                                             <div className="pt-5 pb-1 flex flex-col gap-4 border-t border-[#4F2B33]/10 dark:border-[#91B09A]/10 mt-4">
 
-                                                {/* Data e Localização */}
                                                 <div className="flex flex-col gap-2 text-xs font-medium text-[#4F2B33]/80 dark:text-[#91B09A]/90">
                                                     <div className="flex items-center gap-1.5 opacity-80">
                                                         <LocationIcon />
@@ -146,15 +148,13 @@ export function Experience({ language = 'br' }) {
                                                     </div>
                                                 </div>
 
-                                                {/* Descrição */}
                                                 <Text variant="text" as="p" className="text-[13px] text-[#4F2B33]/90 dark:text-[#91B09A]/90 leading-relaxed">
                                                     {language === 'en' ? exp.descriptionEn : exp.descriptionBr}
                                                 </Text>
 
-                                                {/* Tags */}
                                                 <div className="flex flex-wrap gap-1.5 mt-1">
-                                                    {exp.tags.map((tag, tagIndex) => (
-                                                        <div key={tagIndex} className="px-3 py-1 rounded bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] text-[10px] font-bold tracking-wider uppercase">
+                                                    {exp.tags.map((tag) => (
+                                                        <div key={tag} className="px-3 py-1 rounded bg-[#4F2B33]/10 dark:bg-[#91B09A]/10 text-[#4F2B33] dark:text-[#91B09A] text-[10px] font-bold tracking-wider uppercase">
                                                             {tag}
                                                         </div>
                                                     ))}
@@ -172,9 +172,6 @@ export function Experience({ language = 'br' }) {
         );
     }
 
-    // ----------------------------------------------------------------------
-    // 4. A VERSÃO DESKTOP INTACTA
-    // ----------------------------------------------------------------------
     return (
         <div className="fixed inset-0 pt-8 md:pt-12 pb-6 px-6 bg-[#D0C697] dark:bg-[#272516] overflow-hidden flex flex-col items-center justify-start">
             <div className="absolute z-0 w-[600px] h-[600px] top-10 -right-20 bg-[#4F2B33]/5 dark:bg-[#91B09A]/5 blur-[120px] rounded-full pointer-events-none" />
@@ -194,8 +191,8 @@ export function Experience({ language = 'br' }) {
 
             <div className="relative w-full max-w-4xl h-[500px] md:h-[400px] mt-14 md:mt-16 shrink-0">
                 <div className="absolute -left-6 md:-left-12 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-30">
-                    {experiences.map((_, i) => (
-                        <div key={i} className={`rounded-full transition-all duration-300 ${activeIndex === i ? 'w-2 h-6 bg-[#4F2B33] dark:bg-[#91B09A]' : 'w-2 h-2 bg-[#4F2B33]/30 dark:bg-[#91B09A]/30'}`} />
+                    {experiences.map((exp, i) => (
+                        <div key={`dot-${exp.company}`} className={`rounded-full transition-all duration-300 ${activeIndex === i ? 'w-2 h-6 bg-[#4F2B33] dark:bg-[#91B09A]' : 'w-2 h-2 bg-[#4F2B33]/30 dark:bg-[#91B09A]/30'}`} />
                     ))}
                 </div>
 
@@ -205,7 +202,7 @@ export function Experience({ language = 'br' }) {
 
                     return (
                         <motion.div
-                            key={index}
+                            key={exp.company}
                             custom={diff}
                             variants={cardVariants}
                             initial="future"
@@ -242,8 +239,8 @@ export function Experience({ language = 'br' }) {
                             </Text>
 
                             <div className="flex flex-wrap gap-2 pt-5 mt-4 border-t border-[#4F2B33]/10 dark:border-[#91B09A]/10">
-                                {exp.tags.map((tag, tagIndex) => (
-                                    <div key={tagIndex} className="px-4 py-1.5 rounded-md bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] text-xs font-bold tracking-wider shadow-sm">{tag}
+                                {exp.tags.map((tag) => (
+                                    <div key={tag} className="px-4 py-1.5 rounded-md bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] text-xs font-bold tracking-wider shadow-sm">{tag}
                                     </div>
                                 ))}
                             </div>
