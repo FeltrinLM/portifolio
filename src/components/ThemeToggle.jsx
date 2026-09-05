@@ -4,10 +4,9 @@ import { DndContext, useDraggable } from '@dnd-kit/core';
 import { useMediaQuery } from 'react-responsive';
 
 const MAGNETIC_RADIUS = 60;
-// Margem de segurança do tutorial. Se arrastar mais que isso, o elástico puxa de volta.
 const TUTORIAL_MARGIN = 250;
 
-function IconeMagico({ id, type, position, innerRef }) {
+function IconeMagico({ id, type, position, innerRef, ariaLabel, onClick }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
 
     let currentX = position.x;
@@ -26,6 +25,13 @@ function IconeMagico({ id, type, position, innerRef }) {
         zIndex: isDragging ? 50 : 10,
     };
 
+    function handleKeyDown(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick();
+        }
+    }
+
     return (
         <div
             ref={(node) => {
@@ -35,6 +41,11 @@ function IconeMagico({ id, type, position, innerRef }) {
             style={style}
             {...listeners}
             {...attributes}
+            role="button"
+            tabIndex={0}
+            aria-label={ariaLabel}
+            onClick={onClick}
+            onKeyDown={handleKeyDown}
             className={`w-10 h-10 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing hover:brightness-110 drop-shadow-lg bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
         >
             {type === 'sun' ? (
@@ -64,7 +75,6 @@ function CirculoReceptor({ isHovered, innerRef }) {
 }
 
 export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false }) {
-    // 2. Hook de detecção no topo
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
     const [isHovered, setIsHovered] = useState(false);
@@ -81,7 +91,6 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
             return;
         }
 
-        // Escolhe a classe de animação dependendo de estarmos no tutorial (meio da tela) ou normal (canto)
         const transitionClass = tutorialMode ? 'theme-transition-center' : 'theme-transition';
 
         document.documentElement.classList.add(transitionClass);
@@ -122,7 +131,6 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
                 'dark-mode': !isDraggingLight ? { x: 0, y: 0 } : (prev['dark-mode'].x === 0 && prev['dark-mode'].y === 0 ? { x: -70, y: 0 } : prev['dark-mode'])
             }));
         } else {
-            // Efeito Elástico!
             if (tutorialMode && distance > TUTORIAL_MARGIN) {
                 setPositions({
                     'light-mode': isDarkMode ? { x: -70, y: 0 } : { x: 0, y: 0 },
@@ -137,9 +145,6 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
         }
     }
 
-    // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (SWITCH ESTILO iOS)
-    // ----------------------------------------------------------------------
     if (isMobile) {
         return (
             <button
@@ -151,9 +156,8 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
                         ? 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-14 scale-125'
                         : 'fixed top-6 right-4 w-[72px] h-[36px]'
                 }`}
-                aria-label="Toggle Theme"
+                aria-label={isDarkMode ? "Mudar para tema claro" : "Mudar para tema escuro"}
             >
-                {/* O "Círculo" que desliza */}
                 <div
                     className={`flex items-center justify-center rounded-full bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] shadow-md transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
                         tutorialMode
@@ -162,12 +166,10 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
                     }`}
                 >
                     {isDarkMode ? (
-                        // Ícone da Lua
                         <svg viewBox="0 0 24 24" width={tutorialMode ? "24" : "16"} height={tutorialMode ? "24" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                         </svg>
                     ) : (
-                        // Ícone do Sol
                         <svg viewBox="0 0 24 24" width={tutorialMode ? "24" : "16"} height={tutorialMode ? "24" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                         </svg>
@@ -177,9 +179,6 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
         );
     }
 
-    // ----------------------------------------------------------------------
-    // 4. A VERSÃO DESKTOP INTACTA
-    // ----------------------------------------------------------------------
     const positionClasses = tutorialMode
         ? "top-[50vh] right-[50vw] translate-x-[calc(50%+35px)] -translate-y-1/2"
         : "top-8 right-8 translate-x-0 translate-y-0";
@@ -188,8 +187,20 @@ export function ThemeToggle({ isDarkMode, onThemeChange, tutorialMode = false })
         <div className={`fixed z-[60] w-12 h-12 pointer-events-auto transition-all duration-1000 ease-in-out ${positionClasses}`}>
             <DndContext onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
                 <CirculoReceptor isHovered={isHovered} innerRef={circleRef} />
-                <IconeMagico id="light-mode" type="sun" position={positions['light-mode']} />
-                <IconeMagico id="dark-mode" type="moon" position={positions['dark-mode']} />
+                <IconeMagico
+                    id="light-mode"
+                    type="sun"
+                    position={positions['light-mode']}
+                    ariaLabel="Mudar para tema claro"
+                    onClick={() => { if (isDarkMode) changeThemeWithAnimation(false) }}
+                />
+                <IconeMagico
+                    id="dark-mode"
+                    type="moon"
+                    position={positions['dark-mode']}
+                    ariaLabel="Mudar para tema escuro"
+                    onClick={() => { if (!isDarkMode) changeThemeWithAnimation(true) }}
+                />
             </DndContext>
         </div>
     );

@@ -23,7 +23,6 @@ function ConteudoDasPaginas({ language }) {
     );
 }
 
-// Recebe as props passadas pelo App.jsx
 export default function DesktopApp({
                                        tutorialPhase,
                                        isDarkMode,

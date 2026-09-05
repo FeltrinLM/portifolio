@@ -1,3 +1,13 @@
+:root {
+  --accent: #4F2B33;
+  --accent-bg: rgba(79, 43, 51, 0.1);
+  --accent-border: #4F2B33;
+  --border: rgba(79, 43, 51, 0.2);
+  --text-h: #4F2B33;
+  --social-bg: transparent;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -43,7 +53,7 @@
     top: 34px;
     height: 28px;
     transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
+    scale(1.4);
   }
 
   .vite {
@@ -52,7 +62,7 @@
     height: 26px;
     width: auto;
     transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
+    scale(0.8);
   }
 }
 

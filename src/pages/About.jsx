@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { Text } from '../components/Text';
-import fotoPerfil from '../assets/good_looking.jpeg';
+import fotoPerfil from '../assets/good_looking.webp';
 
 const RUNES = "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛟ ᛞ ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ";
 const DOUBLE_RUNES = RUNES + " " + RUNES;
 
 export function About({ language = 'br' }) {
-    // 2. Detecte o mobile logo no início
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
-    // Todos os seus estados e lógicas do desktop continuam exatamente aqui.
     const [scrollY, setScrollY] = useState(0);
     const [maxScroll, setMaxScroll] = useState(500);
     const [animateSkills, setAnimateSkills] = useState(false);
@@ -80,23 +78,16 @@ export function About({ language = 'br' }) {
         );
     };
 
-    // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (DESIGN NATIVO E FLUÍDO)
-    // ----------------------------------------------------------------------
     if (isMobile) {
         const cvUrl = language === 'en' ? '/cv/cv_lorenzo_en.pdf' : '/cv/cv_lorenzo_br.pdf';
 
         return (
-            // AQUI: pt-16 em vez de pt-28 para subir o conteúdo
             <div className="w-full flex flex-col px-6 pt-16 pb-32 gap-10 overflow-x-hidden">
 
-                {/* --- SEÇÃO 1: HERO MOBILE --- */}
                 <div className="flex flex-col items-center text-center gap-4 relative">
                     <div className="absolute z-0 w-48 h-48 top-12 bg-[#4F2B33]/20 dark:bg-[#91B09A]/15 blur-[60px] rounded-full pointer-events-none"></div>
 
-                    {/* CONTAINER DA FOTO E DAS RUNAS */}
                     <div className="relative z-10 flex items-center justify-center w-64 h-64">
-                        {/* Runas Animadas - Redimensionadas para o Mobile */}
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none scale-90">
                             <svg width="100%" height="100%" viewBox="0 0 300 300" className="absolute animate-[spin_40s_linear_infinite] text-[#4F2B33]/60 dark:text-[#91B09A]/60">
                                 <path id="outer-circle-mobile" d="M 150, 15 A 135,135 0 1,1 149.9,15" fill="none" />
@@ -116,7 +107,6 @@ export function About({ language = 'br' }) {
                             </svg>
                         </div>
 
-                        {/* Foto no Centro */}
                         <img
                             src={fotoPerfil}
                             alt="Lorenzo Feltrin"
@@ -148,7 +138,6 @@ export function About({ language = 'br' }) {
                     </a>
                 </div>
 
-                {/* --- SEÇÃO 2: BIO MOBILE --- */}
                 <div className="flex flex-col gap-6 relative z-10 mt-4">
                     <Text variant="title" as="h2" className="text-3xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                         {language === 'en' ? 'Who I am.' : 'Quem eu sou.'}
@@ -167,7 +156,6 @@ export function About({ language = 'br' }) {
                     </div>
                 </div>
 
-                {/* --- SEÇÃO 3: ÁREA E FOCO --- */}
                 <div className="flex flex-col gap-3 relative z-10">
                     {[
                         {
@@ -195,7 +183,6 @@ export function About({ language = 'br' }) {
                     ))}
                 </div>
 
-                {/* --- SEÇÃO 4: HABILIDADES TÉCNICAS E IDIOMAS --- */}
                 <div className="p-6 rounded-3xl border border-[#4F2B33]/20 dark:border-[#91B09A]/20 bg-[#4F2B33]/[0.03] dark:bg-[#91B09A]/[0.03] shadow-lg flex flex-col gap-8 relative z-10">
                     <Text variant="title" as="h3" className="text-2xl font-bold text-[#4F2B33] dark:text-[#D0C697]">
                         {language === 'en' ? 'Technical Skills' : 'Habilidades Técnicas'}
@@ -234,9 +221,7 @@ export function About({ language = 'br' }) {
                         {language === 'en' ? 'Languages' : 'Idiomas'}
                     </Text>
 
-                    {/* Gráficos Circulares de Idiomas adaptados para tamanho de celular */}
                     <div className="flex flex-row justify-around mt-2">
-                        {/* Português (100%) */}
                         <div className="flex flex-col items-center gap-3">
                             <div className="relative flex items-center justify-center w-16 h-16">
                                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -254,7 +239,6 @@ export function About({ language = 'br' }) {
                             </Text>
                         </div>
 
-                        {/* Inglês (90%) */}
                         <div className="flex flex-col items-center gap-3">
                             <div className="relative flex items-center justify-center w-16 h-16">
                                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -277,13 +261,9 @@ export function About({ language = 'br' }) {
         );
     }
 
-    // ----------------------------------------------------------------------
-    // 4. A VERSÃO DESKTOP INTACTA
-    // ----------------------------------------------------------------------
     return (
         <div className="relative w-full h-[170vh]">
 
-            {/* --- SEÇÃO 1: HERO --- */}
             <div
                 className="fixed inset-0 w-full flex flex-col items-center justify-start pt-[12vh] pointer-events-none"
                 style={{
@@ -295,7 +275,6 @@ export function About({ language = 'br' }) {
                 <div className="absolute z-0 w-64 h-64 md:w-96 md:h-96 top-[20vh] bg-[#4F2B33]/20 dark:bg-[#91B09A]/15 blur-[80px] rounded-full pointer-events-none"></div>
 
                 <div className="relative w-full max-w-5xl flex items-center justify-center mb-8 pointer-events-auto">
-                    {/* <BackgroundCarousel language={language} /> */}
 
                     <div className="relative z-10 flex items-center justify-center w-72 h-72 md:w-80 md:h-80">
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -334,7 +313,6 @@ export function About({ language = 'br' }) {
                 </div>
             </div>
 
-            {/* --- SEÇÃO 2: CONTEÚDO --- */}
             <div
                 className="fixed inset-0 w-full h-screen px-6 pt-32 pb-[240px] flex items-center justify-center pointer-events-none"
                 style={{
@@ -443,7 +421,6 @@ export function About({ language = 'br' }) {
 
                                     <div className="flex flex-row justify-around mt-2">
 
-                                        {/* Português (100%) */}
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="relative flex items-center justify-center w-20 h-20">
                                                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -468,7 +445,6 @@ export function About({ language = 'br' }) {
                                             </Text>
                                         </div>
 
-                                        {/* Inglês (90%) */}
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="relative flex items-center justify-center w-20 h-20">
                                                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">

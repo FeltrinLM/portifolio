@@ -4,58 +4,57 @@ import { Text } from './Text';
 
 export function ResumeCard({ language = 'br', className = '' }) {
     const isMobile = useMediaQuery({ maxWidth: 768 });
-
     const url = language === 'en' ? '/cv/cv_lorenzo_en.pdf' : '/cv/cv_lorenzo_br.pdf';
 
     const [showBubble, setShowBubble] = useState(false);
     const [messageIndex, setMessageIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
 
-    const messagesBr = ['Ei...', 'Eu tô aqui!', 'Clica em mim', 'Psiu...'];
-    const messagesEn = ['Hey...', 'I am here!', 'Click me', 'Psst...'];
-    const messages = language === 'en' ? messagesEn : messagesBr;
+    const messages = language === 'en'
+        ? ['Hey...', 'I am here!', 'Click me', 'Psst...']
+        : ['Ei...', 'Eu tô aqui!', 'Clica em mim', 'Psiu...'];
 
     useEffect(() => {
+        let hideTimeout;
+        let nextMessageTimeout;
+
         const interval = setInterval(() => {
             setShowBubble(true);
 
-            setTimeout(() => {
+            hideTimeout = setTimeout(() => {
                 setShowBubble(false);
 
-                setTimeout(() => {
+                nextMessageTimeout = setTimeout(() => {
                     setMessageIndex((prev) => (prev + 1) % messages.length);
                 }, 500);
             }, 3000);
 
         }, 12000);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            clearTimeout(hideTimeout);
+            clearTimeout(nextMessageTimeout);
+        };
     }, [messages.length]);
 
-    // ----------------------------------------------------------------------
-    // 3. A INTERCEPTAÇÃO MOBILE (SUMIR COM O CARD)
-    // ----------------------------------------------------------------------
     if (isMobile) {
-        // Retornar nulo significa que o componente não vai existir na tela.
-        // Faremos um botão tradicional de "Baixar CV" direto na página Sobre depois!
         return null;
     }
 
-    // ----------------------------------------------------------------------
-    // 4. A VERSÃO DESKTOP INTACTA
-    // ----------------------------------------------------------------------
+    const ariaLabelText = language === 'en' ? 'Download CV' : 'Baixar Currículo';
+
     return (
         <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={ariaLabelText}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            // HITBOX EXPANDIDA: w-28 h-40
             className={`fixed right-4 md:right-8 bottom-0 z-[100] w-28 h-40 flex items-end justify-center group transition-all duration-700 ease-in-out translate-y-[45%] hover:-translate-y-4 hover:-rotate-[12deg] cursor-pointer ${className}`}
             style={{ perspective: '1000px' }}
         >
-            {/* --- ESTILOS INJETADOS --- */}
             <style>{`
                 @keyframes slow-3d-spin {
                     0% { transform: rotateY(0deg); }
@@ -85,7 +84,6 @@ export function ResumeCard({ language = 'br', className = '' }) {
                 .group:hover .s-6 { animation-delay: 3.5s; }
             `}</style>
 
-            {/* --- BALÃO DE FALA --- */}
             <div
                 className={`absolute bottom-[85%] whitespace-nowrap px-3 py-1.5 bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#3B381E] text-[10px] md:text-[11px] font-bold rounded-lg shadow-lg transition-all duration-300 z-30 
                 ${showBubble && !isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}
@@ -94,7 +92,6 @@ export function ResumeCard({ language = 'br', className = '' }) {
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#4F2B33] dark:bg-[#91B09A] rotate-45"></div>
             </div>
 
-            {/* --- ESTRELINHAS MÍSTICAS ESPALHADAS --- */}
             <div className="absolute inset-0 pointer-events-none z-0">
                 <span className="sparkle s-1 absolute top-[10%] left-[15%] text-[#4F2B33] dark:text-[#D0C697] text-[14px] opacity-0">✦</span>
                 <span className="sparkle s-2 absolute top-[35%] right-[5%] text-[#4F2B33] dark:text-[#D0C697] text-[10px] opacity-0">✦</span>
@@ -104,7 +101,6 @@ export function ResumeCard({ language = 'br', className = '' }) {
                 <span className="sparkle s-6 absolute top-[5%] right-[25%] text-[#4F2B33] dark:text-[#D0C697] text-[11px] opacity-0">✦</span>
             </div>
 
-            {/* --- A CARTA 3D --- */}
             <div
                 className="spin-magic relative w-14 h-24 md:w-16 md:h-28 z-20 mb-2"
                 style={{ transformStyle: 'preserve-3d' }}
