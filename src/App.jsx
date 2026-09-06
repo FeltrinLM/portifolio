@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, useLocation } from 'react-router-dom';
-import { useMediaQuery } from 'react-responsive';
-import DesktopApp from './DesktopApp';
-import MobileApp from './MobileApp';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Navbar } from './components/Navbar';
+import { ThemeToggle } from './components/ThemeToggle';
+import { LanguageToggle } from './components/LanguageToggle';
+import { ResumeCard } from './components/ResumeCard';
+import { About } from './pages/About';
+import { Contact } from './pages/Contact';
+import { Experience } from './pages/Experience';
+import { Projects } from './pages/Projects';
 
 function ScrollToTop() {
     const { pathname } = useLocation();
@@ -14,11 +19,22 @@ function ScrollToTop() {
     return null;
 }
 
-export default function App() {
-    const isMobile = useMediaQuery({ maxWidth: 768 });
+function ConteudoDasPaginas({ language }) {
+    return (
+        <main className="pb-[300px] p-10">
+            <Routes>
+                <Route path="/" element={<Navigate to="/sobre" replace />} />
+                <Route path="/sobre" element={<About language={language} />} />
+                <Route path="/experiencia" element={<Experience language={language} />} />
+                <Route path="/projetos" element={<Projects language={language} />} />
+                <Route path="/contato" element={<Contact language={language} />} />
+            </Routes>
+        </main>
+    );
+}
 
-    const [tutorialPhase, setTutorialPhase] = useState(() => localStorage.getItem('tutorial_done') ? 'done' : 'theme');
-    const [isDarkMode, setIsDarkMode] = useState(true);
+export default function App() {
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const [language, setLanguage] = useState('br');
 
     function handleThemeChange(newTheme) {
@@ -29,31 +45,32 @@ export default function App() {
         setLanguage(newLang);
     }
 
-    function handleNextPhase(nextPhase) {
-        setTutorialPhase(nextPhase);
-        if (nextPhase === 'done') {
-            localStorage.setItem('tutorial_done', 'true');
-        }
-    }
-
-    const sharedProps = {
-        tutorialPhase,
-        isDarkMode,
-        isLanguage: language,
-        language,
-        handleThemeChange,
-        handleLanguageChange,
-        handleNextPhase
-    };
-
     return (
         <BrowserRouter>
             <ScrollToTop />
-            {isMobile ? (
-                <MobileApp {...sharedProps} />
-            ) : (
-                <DesktopApp {...sharedProps} />
-            )}
+
+            <div className={`relative min-h-screen overflow-x-hidden font-serif transition-colors duration-500 ${isDarkMode ? 'dark bg-[#272516]' : 'bg-[#D0C697]'}`}>
+
+                <ConteudoDasPaginas language={language} />
+
+                <ResumeCard language={language} />
+
+                <div className="absolute inset-0 pointer-events-none z-50">
+                    <ThemeToggle
+                        isDarkMode={isDarkMode}
+                        onThemeChange={handleThemeChange}
+                    />
+
+                    <LanguageToggle
+                        language={language}
+                        onLanguageChange={handleLanguageChange}
+                    />
+
+                    <div className="pointer-events-auto">
+                        <Navbar language={language} />
+                    </div>
+                </div>
+            </div>
         </BrowserRouter>
     );
 }

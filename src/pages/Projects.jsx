@@ -15,6 +15,12 @@ const GitHubIcon = () => (
     </svg>
 );
 
+const ExternalLinkIcon = () => (
+    <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+    </svg>
+);
+
 const projects = [
     {
         title: 'Journey',
@@ -25,9 +31,9 @@ const projects = [
         tags: ['Java (Spring)', 'Angular', 'Flutter', 'Mermaid'],
         featured: false,
         links: [
-            { label: 'Backend', url: 'https://github.com/FeltrinLM/Journey_Back-end' },
-            { label: 'Frontend', url: 'https://github.com/FeltrinLM/JourneyFront-end' },
-            { label: 'Mobile', url: 'https://github.com/FeltrinLM/journey_mobile' }
+            { label: 'Backend', url: 'https://github.com/FeltrinLM/Journey_Back-end', type: 'github' },
+            { label: 'Frontend', url: 'https://github.com/FeltrinLM/JourneyFront-end', type: 'github' },
+            { label: 'Mobile', url: 'https://github.com/FeltrinLM/journey_mobile', type: 'github' }
         ]
     },
     {
@@ -39,8 +45,9 @@ const projects = [
         tags: ['Java (Spring)', 'PostgreSQL', 'Angular', 'Docker'],
         featured: true,
         links: [
-            { label: 'Backend', url: 'https://github.com/FeltrinLM/LENPA_backend' },
-            { label: 'Frontend', url: 'https://github.com/FeltrinLM/LENPA-frontend' }
+            { label: 'Backend', url: 'https://github.com/FeltrinLM/LENPA_backend', type: 'github' },
+            { label: 'Frontend', url: 'https://github.com/FeltrinLM/LENPA-frontend', type: 'github' },
+            { label: 'Website', url: 'https://projetointegrador1csi.ufsm.br/lenpa/', type: 'external' }
         ]
     },
     {
@@ -157,7 +164,7 @@ export function Projects({ language = 'br' }) {
                                             transition={{ duration: 0.3, ease: "easeInOut" }}
                                             className="overflow-hidden"
                                         >
-                                            <div className="pt-5 pb-1 flex flex-col gap-4 border-t border-[#4F2B33]/10 dark:border-[#91B09A]/10 mt-4">
+                                            <div className="pt-4 pb-1 flex flex-col gap-3 border-t border-[#4F2B33]/10 dark:border-[#91B09A]/10 mt-3">
 
                                                 <Text variant="text" as="p" className="text-[13px] text-[#4F2B33]/90 dark:text-[#91B09A]/90 leading-relaxed">
                                                     {language === 'en' ? project.descriptionEn : project.descriptionBr}
@@ -179,11 +186,11 @@ export function Projects({ language = 'br' }) {
                                                                 href={link.url}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                aria-label={`Acessar repositório ${link.label} do projeto ${project.title}`}
+                                                                aria-label={link.type === 'external' ? `Acessar site ${link.label} do projeto ${project.title}` : `Acessar repositório ${link.label} do projeto ${project.title}`}
                                                                 onClick={(e) => e.stopPropagation()}
                                                                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] text-[11px] font-bold tracking-wider active:scale-95 transition-transform shadow-sm"
                                                             >
-                                                                <GitHubIcon />
+                                                                {link.type === 'external' ? <ExternalLinkIcon /> : <GitHubIcon />}
                                                                 {link.label}
                                                             </a>
                                                         ))}
@@ -234,7 +241,8 @@ export function Projects({ language = 'br' }) {
                         <motion.div
                             key={project.title}
                             variants={cardVariants}
-                            className={`group relative flex flex-col justify-between p-6 md:p-8 rounded-2xl border transition-all duration-300 ease-out
+                            // Ajustes leves de padding (p-5 md:p-6) para o card absorver o botão extra
+                            className={`group relative flex flex-col justify-between p-5 md:p-6 rounded-2xl border transition-all duration-300 ease-out
                                 ${isFeatured
                                 ? 'border-[#4F2B33]/30 dark:border-[#91B09A]/40 bg-[#4F2B33]/[0.04] dark:bg-[#91B09A]/10 shadow-[0_15px_50px_-15px_rgba(79,43,51,0.4)] dark:shadow-[0_15px_50px_-15px_rgba(145,176,154,0.2)] md:-translate-y-6 z-10'
                                 : 'border-[#4F2B33]/15 dark:border-[#91B09A]/20 bg-transparent hover:bg-[#4F2B33]/[0.02] dark:hover:bg-[#91B09A]/[0.02] hover:-translate-y-2 hover:shadow-xl'
@@ -251,7 +259,8 @@ export function Projects({ language = 'br' }) {
                                 <SparkleIcon />
                             </div>
 
-                            <div className="flex flex-col gap-4">
+                            {/* Gap reduzido de gap-4 para gap-3 para ganhar respiro */}
+                            <div className="flex flex-col gap-3">
                                 <div>
                                     <Text variant="title" as="h2" className="text-2xl md:text-3xl font-bold text-[#4F2B33] dark:text-[#D0C697] pr-8">
                                         {project.title}
@@ -275,17 +284,18 @@ export function Projects({ language = 'br' }) {
                             </div>
 
                             {project.links.length > 0 && (
-                                <div className="flex flex-wrap gap-2 pt-5 mt-6 border-t border-[#4F2B33]/15 dark:border-[#91B09A]/20">
+                                /* Espaçamento ajustado (pt-4 mt-4) para encaixar na base sem expandir demais */
+                                <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-[#4F2B33]/15 dark:border-[#91B09A]/20">
                                     {project.links.map((link) => (
                                         <a
                                             key={link.label}
                                             href={link.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            aria-label={`Acessar repositório ${link.label} do projeto ${project.title}`}
+                                            aria-label={link.type === 'external' ? `Acessar site ${link.label} do projeto ${project.title}` : `Acessar repositório ${link.label} do projeto ${project.title}`}
                                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#4F2B33] dark:bg-[#91B09A] text-[#D0C697] dark:text-[#272516] text-[11px] font-bold tracking-wider hover:-translate-y-0.5 transition-transform shadow-sm"
                                         >
-                                            <GitHubIcon />
+                                            {link.type === 'external' ? <ExternalLinkIcon /> : <GitHubIcon />}
                                             {link.label}
                                         </a>
                                     ))}
